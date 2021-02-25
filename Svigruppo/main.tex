@@ -1,0 +1,59 @@
+\documentclass[11pt]{article}
+\usepackage{graphicx}
+\usepackage{dirtytalk}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{wrapfig}
+\usepackage{minted}
+\usepackage{biblatex}
+\usepackage{csquotes}
+\usepackage{minted}
+\usepackage{xcolor}
+\definecolor{LightGray}{gray}{0.9}
+\addbibresource{bibliografia.bib}
+\usepackage[a4paper, total={5.8in, 8.3in}]{geometry}
+\usepackage{comment}
+
+\pagenumbering{gobble}
+
+\title{
+    \vspace{0.5in}
+    \includegraphics[scale=0.1]{img/Logo_Unimi.png}\\
+    \vspace{1.1in}
+    \textbf{Sviluppo software in gruppi di lavoro complessi}
+}
+\author{
+    \vspace{0.1in}
+    Federico Piscitelli - Omar Zaher - Simone Malesardi \\
+    \vspace{0.1in}
+    Matricole 970949 - 970944 - 978989\\
+    \vspace{0.1in}
+    \vspace{0.5in}
+    A.A. 2020/2021 
+}
+\date{Ultimo aggiornamento \today}
+
+\AtBeginEnvironment{minted}{%
+  \renewcommand{\fcolorbox}[4][]{#4}}
+
+\begin{document}
+\maketitle
+\clearpage
+\pagenumbering{roman}
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+\include{chap1}
+\include{chap2}
+\include{chap3}
+\include{chap4}
+\include{chap5}
+\include{chap6}
+\include{chap7}
+\include{chap8}
+\include{chap9}
+\include{chap10}
+\include{chap11}
+\printbibliography
+\end{document}

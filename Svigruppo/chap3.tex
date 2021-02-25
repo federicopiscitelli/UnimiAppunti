@@ -1,0 +1,73 @@
+\section{Modelli a bazaar}
+Il modello a bazaar, a differenza di quello a cattedrale è portato avanti in parallelo da diversi sviluppatori che, ognuno col suo stile, ognuno col suo metodo, arricchiscono di funzionalità il progetto iniziale. Si passa quindi da un modello accentrato, quale il modello a cattedrale, ad un modello estremamente decentrato (il bazaar). Il modello di sviluppo è in buona parte indipendente dal modello di gestione della proprietà intellettuale.\\\\
+Nell'articolo di Raymond \cite{catbazaar} l'analisi è concentrata su due tipi di software open-source:
+\begin{itemize}
+    \item GCC (a cattedrale)
+    \item Linux (a bazaar)
+\end{itemize}
+L'esempio di Linux è sicuramente il più lampante, infatti, con le sue 27mln di righe di codice, il suo primo rilascio il 17 settembre 1991, i suoi 1991 sviluppatori (di cui 304 nuovi) che hanno lavorato all'ultima release di agosto 2020, è la dimostrazione che anche i progetti a bazaar possono avere successo (contrariamente a quanto si potesse pensare). 
+
+\subsection{Un buon progetto bazaar}
+Un buon progetto bazaar per essere tale deve avere 4 caratteristiche fondamentali:
+\begin{itemize}
+    \item Il progetto deve nascere da un "fastidio" (itch) di un programmatore
+    \item Bisogna trattare gli utenti come co-sviluppatori per poter effettuare rapidi miglioramenti al codice e per rendere effettivo il processo di debug.
+    \item Bisogna rilasciare presto, spesso e ascoltare i "clienti"\
+    \item Bisogna avere un grande numero di tester e sviluppatori in modo che la quasi totalità dei problemi potrà essere riconosciuto e sistemato da qualcuno
+\end{itemize}
+Proprio quest'ultimo punto ci introduce la Legge di Linus (Torvalds) che sembra essere in completa antitesi con la Legge di Brooks:
+\begin{center} \say{Given enough eyeballs, all bugs are shallow} \end{center}
+Secondo Raymond \cite{catbazaar}, la Legge di Brooks sembra non valere più:
+\say{Provided the development coordinator has a medium at least as good as the Internet, and knows how to lead without coercion, many heads are inevitably better than one.}
+\clearpage
+\subsection{Dal Bazaar al Kibbutz}
+Fino ad ora abbiamo parlato di due stili che, metaforicamente, descrivono il processo di sviluppo di un software:
+\begin{itemize}
+    \item il bazaar: chiunque può contribuire con del codice al sorgente messo a disposizione dal "promoter", che si occuperà di integrare tutte le aggiunte nel codice principale del progetto
+    \item la cattedrale: un architetto comanda un piccolo gruppo di lavoratori specializzati con un preciso scheduling dei tasks e ognuno con le sue responsabilità
+\end{itemize}
+Tuttavia questi due modelli non descrivono ancora tutte le casistiche di stili possibili. Infatti, come riportato anche nell'articolo del Prof. Monga \cite{bazaarkibbutz}, alcuni studi hanno evidenziato come molti progetti open source (web server Apache, il Kernel di Linux, il browser Mozilla) stanno nel mezzo dei due estremi: il progetto è portato avanti da un gruppo di 10-15 persone che controllano la base del codice e sono responsabili per l'80\% del codice scritto, ma data l'apertura del codice ci possono essere diversi contributor che correggono bugs o aggiungono features.\\
+Come esempio da analizzare prenderemo il progetto Debian che come scopo ha quello di produrre una coerente distribuzione di software gratuito a partire dal lavoro di volontari indipendenti. \\
+Come si diceva in precedenza l'open source era visto come un bazaar, un magico calderone dove i contribuenti buttavano il loro codice. In realtà però, per creare distribuzioni coerenti ci vuole grande organizzazione e collaborazione tra le parti coinvolte, quindi la metafora del Bazaar sembra non andare più bene, come non va bene neanche la metafora della Cattedrale visto che non c'è nessun architetto e il lavoro è portato avanti solo da volontari.\\ Il Prof. Monga introduce quindi la metafora del Kibbutz, una comunità cooperativa che persegue uno stesso obiettivo. Le proprietà fondamentali che caratterizzano questa comunità sono:
+\begin{itemize}
+    \item le persone entrano a far parte della comunità su base volontaria e non si aspettano nessun tipo di remunerazione per il loro lavoro
+    \item i membri sono tutti d'accordo e perseguono un obiettivo comune
+    \item i membri condividono una coscienza civica e accettano che il loro lavoro sia regolato da esplicite regole stabilite tramite una democrazia diretta
+\end{itemize}
+
+\subsection{L'esempio di Debian}
+\subsubsection{Le motivazioni}
+Il progetto Debian nasce nell'agosto 1993 da un'idea di Ian Murdock che aveva lo scopo di mantenere e assemblare una distribuzione di software Linux lavorando in maniera "aperta", seguendo lo spirito di Linux e GNU.
+\subsubsection{La struttura}
+Chiunque può candidarsi per diventare un membro della Debian community. Per essere accettato deve dimostrare di possedere capacità base di trattamento dei software e dei packages e deve conoscere “Debian Free Software Guidelines” e “Debian Social Contract”.
+Accettando di prendere parte al progetto si accetta anche la Debian Constitution che definisce un'organizzazione snella con queste figure presenti:
+\begin{itemize}
+    \item Project Leader (DL)
+    \item Project Secretary (DS)
+    \item Technical Committee (TC): formato da 8 memebri
+    \item Individual Developers
+\end{itemize}
+DL, DS, TC devono essere diverse persone. \textbf{I lavoro è tutto su base volontaria: nessuno è obbligato a fare nulla e ognuno può decidere se candidarsi per un lavoro o meno.} \\
+Ogni anno viene eletto un DL da tutti gli Individual Developers. Un DL può prendere decisioni urgenti, può nominare il DS e insieme al DS e al TC può rinnovare il TC stesso.\\
+Il TC è composto da 8 membri (con un minimo di 4) e decide le policy a livello tecnico. \\
+Il DS è eletto dal DL ogni anno e si occupa di gestire ogni sorta di elezione ed eventuali distpute sulla costituzione.\\
+Le proprietà e le attività finanziarie sono amministrate da "Software in the Public Interest, Inc" (SPI) dove ogni membro della community può essere membro votante.\\\\
+Le conseguenze che derivano da una struttura del genere è che nessun individuo può prendere il controllo dell'intero progetto e siccome la coerenza del prodotto finale è l'obiettivo su cui tutti i membri sono d'accordo, questa libertà deve essere controllata da un numero di regole che sono definite dal TC, ma devono comunque avere un alto grado di consenso generale.\\\\
+Ovviamente nell'organizzazione spiegata fin'ora mancano diversi attori:
+\begin{itemize}
+    \item Upstream Authors: contribuiscono a Debian scrivendo software open source. In linea teorica non dovrebbero essere al corrente del progetto Debian, ma in realtà sono in contatto con gli sviluppatori Debian siccome all'interno di Debian gran parte del lavoro è scoprire e correggere bugs.
+    \item Users: la soddisfazione degli utenti è sicuramente una caratteristica che direziona il progetto. Debian propone per i suoi utenti un sofisticato sistema di tracking dei bug (Debian Bug Tracking System, DBTS) dove gli utenti possono non solo segnalare un bug, ma anche proporre una soluzione.
+    \item Ultima categoria (molto in ascesa) sono soloro che utilizzano Debian come base di partenza per creare delle distribuzioni personalizzate.
+\end{itemize}
+\subsubsection{Le distribuzioni}
+Una distribuzione è composta da un programma di installazione e un set di packages. Il programma di installazione è in grado di impostare il sistema da zero su diversi tipi di hardware (questo rende l'installazione un processo abbastanza complicato). I packages possono essere recuperati in una serie di CD, dal hard disk o dalla rete.\\
+Tutto l'effort di sviluppo è incentrato sulla produzione di packages. Ma cos'è un package?\\
+Un package è l'unità minima che può essere installata o disinstallata da un sistema. \\
+Ogni DD è responsabile di uno o più packages e ha il compito di svilupparlo e/o mantenerlo. Una volta che questo è completo viene caricato nella repository pubblica da dove i Debian user possono scaricarlo e provarlo sui loro sistemi. Siccome il pacchetto è stato testato solo dallo sviluppatore verrà considerato come alpha-testing e la repository verrà chiamata unstable distribution. Un pacchetto che rimane in unstable-distribution per dieci giorni senza che vengano segnalati bug, viene automaticamente caricato in un'altra repository (più stabile) e prende lo stato di beta-testing. Questa repository è conosciuta come distribuzione di testing. 
+\subsubsection{Coordinamento}
+L'obiettivo di ottenere una distribuzione coerente, dove ogni programma interagisce linearmente con gli altri, è molto complesso.
+Infattu, lo sforzo principale portato avanti dai DDs è diretto a garantire che i loro pacchetti siano completamente conformi alle politiche Debian. \\
+Le policies sono la chiave nell'approccio Debian nella distribuzione software. I DDs sono liberi fino a che seguono le policies approvate da tutti. Spesso queste sono basate su standard internazionali o della community e riguardano tutti i problemi di incoerenza in un sistema. 
+\subsection{Conclusioni}
+Abbiamo già evidenziato più volte la complicatezza nell'obiettivo perseguito dal progetto Debian. Questa sembra essere stata annullata grazie all'approccio utilizzato che non segue nè il modello a cattedrale (con un singolo architetto con tutti i poteri) nè segue il modello a bazaar (dove la coordinazione sta nell'interazione delle parti). 
+Il modello adottato da Debian preserva la libertà di azione e decide democraticamente la coerenza. 

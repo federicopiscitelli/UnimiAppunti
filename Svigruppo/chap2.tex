@@ -1,0 +1,39 @@
+\section{La cattedrale, il bazaar e altri modelli}
+Nel libro \textit{The mythical man-month} (lettura obbligatoria fino al capitolo 7) Fred Brooks racconta la sua esperienza all'interno di IBM, durante il progetto di OS/360.\\\\
+\say{Large-system programming has over the past decade
+been such a tar pit, and many great and powerful beasts
+have thrashed violently in it. Most have emerged with running systems—few have met goals, schedules, and budgets.
+Large and small, massive or wiry, team after team has become entangled in the tar. No one thing seems to cause the
+difficulty—any particular paw can be pulled away. But the
+accumulation of simultaneous and interacting factors brings
+slower and slower motion. Everyone seems to have been
+surprised by the stickiness of the problem, and it is hard to
+discern the nature of it. But we must try to understand it
+if we are to solve it.} \cite{manmonth} - Fred Brooks, The mythical man-month
+\subsection{I problemi identificati da Brooks}
+Nonostante l'insuccesso di questo progetto, Brooks è riuscito a trarre ottime osservazioni, utili ancora oggi nel mondo dell'ingegneria del software. Le più importanti:
+\begin{itemize}
+    \item le tecniche di stima sono poco sviluppate e si tende ad assumere che tutto andrà bene (il modello COCOMO è la tecnica di stima più famosa in ambito software)
+    \item si confonde "effort" con "progress", ma questi non corrispondono. È molto facile stimare quanto si è lavorato, è meno facile misurare di quanto si è progredito, e questo può causare ulteriori ritardi
+    \item il progredire dello sviluppo viene controllato in maniera molto superficiale
+    \item si risponde ai ritardi aggiungendo personale
+\end{itemize}
+
+\noindent Tra tutte queste osservazioni, l'ultima è forse la più importante, perchè è proprio da questa che deriva la famosa \textbf{legge di Brooks}. Nello sviluppo software, non tutto è facilmente parallelizzabile. Se una donna ci mette 9 mesi a far nascere un bambino, mettendone insieme due non ci vorranno 4 mesi e mezzo.
+
+\subsection{La legge di Brooks}
+\begin{center}
+\say{Adding manpower to a late software project makes it later}
+\end{center}
+Aggiungere forza lavoro ad un progetto software in ritardo, lo fa ritardare ancora di più. Può sembrare un paradosso, eppure è così.\\\\
+Ogni lavoratore deve essere formato e deve essere a conoscienza delle tecnologie utilizzate, degli obiettivi, della strategia, di quello che è stato fatto fino ad ora. Questa parte di formazione non può essere divisa e varia in base al numero di lavoratori. Inoltre tutto ciò peggiora la comunicazione tra i vari membri dei team. Se ogni parte del lavoro deve essere cordinata in maniera separata dalle altre parti l'effort aumenta a \(\frac{n(n-1)}{2}\). Tre lavoratori richiedono tre volte tanto il lavoro di comunicazione che avviene tra una coppia di lavoratori. Quattro ne richiedono sei volte tanto.
+\begin{center}
+    costo del coordinamento \(\propto\) \(n^2\)
+\end{center}
+
+\subsection{Modelli organizzativi}
+Secondo Brooks è fondamentale preservare l'integrità concettuale di un progetto. I modelli organizzativi citati sono:
+\begin{itemize}
+    \item La Cattedrale: rigorosa separazione fra lavoro architetturale (accentrato) e implementativo (distribuito). Un modello gerarchico in cui si distribuisce il lavoro in maniera piramidale.
+    \item La sala operatoria (H. Mills): un chirurgo e un co-pilota, contornati da una equipe con ruoli precisi, ma tutti giocano per loro.  Il vero lavoro viene svolto solamente dal chirurgo.
+\end{itemize}

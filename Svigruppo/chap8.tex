@@ -1,0 +1,203 @@
+\section{Docker}
+
+Con la crescita della dimensione degli oggetti da sviluppare e del numero di persone concorrenti, è nata la necessità di introdurre nuovi strumenti per poter comunque lavorare in maniera efficace. Quando si sviluppano software complessi, possono essere impiegati diversi:
+
+\begin{itemize}
+    \item linguaggi (polyglot)
+    \item librerie (versioni multiple)
+    \item servizi (dbms, httpd, cache, log, ...)
+    \item persone (onboarding)
+    \item testing (fixtures)
+\end{itemize}
+
+\noindent Per risolvere questo problema si è pensato di adottare un approccio DevOps, scaricando alcune responsabilità sul developer. Si vuole:
+
+\begin{itemize}
+    \item Dal punto di vista dei Dev:
+    \begin{itemize}
+        \item predicibilità: eseguendo due volte lo stesso codice, sullo stesso ambiente di sviluppo, si ottiene lo stesso risultato.
+        \item replicabilità: spostandolo su un altro ambiente viene mantenuto il funzionamento.
+        \item versionamento: sistema di gestione delle configurazioni (il software funziona con un certo linguaggio, certe librerie, ecc.)
+        \item leggero: tutto questo dev'essere ottenuto attraverso un meccanismo efficiente e leggero.
+    \end{itemize}
+    \item Dal punto di visto degli Ops:
+    \begin{itemize}
+        \item tolleranza al fallimento: replicare le parti in maniera tale che se una parte smette di funzionare, le altre continuano ad andare.
+        \item portabilità: funzioni anche sul proprio server, oltre a quello di sviluppo.
+        \item scalabilità: possibilità di aumentare le risorse con l'aumentare dei clienti. Più risorse, più performance.
+        \item componibilità, attraverso moduli.
+        \item schedulazione \& orchestrazione, in maniera automatica.
+    \end{itemize}
+\end{itemize}
+
+\noindent Possibili soluzioni sono:
+
+\begin{itemize}
+    \item Configuration management: strumenti che permettono di dare una descrizione, in alcune casi imperativa, per configurare macchine hardware. Ansible, Chef, Puppet, Saltstack, Terraform.
+    \item Virtualizzazione: strumenti che virtualizzano l'hardware, permettendo di avere più sistemi operativi sulla stessa macchina. LXC, KVM, Vagrant.
+    \item Containers: strumenti basati sull'idea di conteinerizzazione. Docker, Singularity.
+\end{itemize}
+
+\subsection{Virtualizzazione in stile Docker}
+
+In Docker si ha una virtualizzazione fortemente dipendente dal sistema operativo. Necessita, quindi, di supporto da parte del kernel per:
+\begin{itemize}
+    \item separazione dei processi: permette la virtualizzazione dello spazio dei processi. Mantiene separati processi di gruppi diversi.
+    \item supporto sul filesystem: una sola copia del filesystem che serve a più immagini diverse. Il kernel controlla che vengano allocate solo le modifiche da parte dei diversi container rispetto all'immagine standard (copy-on-write).
+    \item networking: meccanismi di astrazione del networking. Container sulla stessa macchina o su macchine distinte possono lavorare insieme.
+\end{itemize}
+
+%Docker su apple o windows c'è un hypervisor linux con docker (?). Docker è efficiente se utilizzato su Linux.
+
+\subsection{Immagini e Container}
+
+Un'immagine, nel gergo di Docker, è un grafo aciclico (DAG) di filesystem read-only e copy-on-write. Queste possono essere ottenute attraverso: pull (da un Docker Hub, su cui è anche possibile effettuare una push), build o commit.
+
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker pull hello-world
+\end{minted}
+
+\noindent Un container è ciò che si ottiene prendendo un'immagine read-only, tramutando il filesystem in read-write e mettendo in esecuzione un processo distinto. Un container si può ottenere:
+\begin{itemize}
+    \item esplicitamente attraverso una create
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker create --name dt-image hello-world
+\end{minted}
+    \item implicitamente attraverso una run (= create + start)
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker run hello-world
+\end{minted}
+\end{itemize}
+
+\noindent Comandi per la gestione delle immagini: 
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+docker images (elenco immagini), docker inspect, docker rmi (rimuovere immagine),
+docker pull, docker push, docker export, docker import, docker create, docker run
+\end{minted}
+
+\noindent Comandi per la gestione dei container:
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+docker ps [-a] (elenco container; l'opzione -a visualizza anche i processi terminati),
+docker inspect, docker rm (rimuovere container), docker start, docker stop,
+docker kill, docker pause, docker unpause
+\end{minted}
+
+\noindent In che modo è possibile produrre un'immagine? Di seguito due possibili approcci:
+
+\begin{itemize}
+    \item worst practice: eseguire un'immagine esistente, fare delle modifiche ed infine effettuare una commit (registrandola con una tag simbolica). Questo approccio non è riproducibile.
+    \item best practice: utilizzare un processo di build che si basa su un Dockerfile, un file che specifica i passi di creazione e di configurazione dell'immagine.
+\end{itemize}
+
+\noindent È poi ragionevole rendere l'immagine pubblica. Per farlo, ci si può registrare su Docker ed inviare l'immagine a Docker Hub utilizzando il comando docker push, che pusha solo i nodi che non sono già noti e tutto il necessario per poter porre in esecuzione l'applicazione in un secondo momento.\\
+
+\noindent Un container Docker può essere posto in esecuzione in diversi modi:
+\begin{itemize}
+    \item ephemeral
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker run --rm busybox date
+\end{minted}
+    Eseguo un container specificando il comando da eseguire al suo interno. L'opzione --rm indica che quando il container termina viene eliminato.
+    \item attached
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker run -it busybox
+\end{minted}
+    Eseguo un container allocando una TUI in cui poter eseguire i comandi.
+    \item daemonized
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker run --name dt-daemon -d busybox \
+    sh -c 'while true; do date; sleep 10; done'
+\end{minted}
+    Eseguo un container in background. Usualmente nei container vengono messi in esecuzione dei server, che rimangono costantemente in esecuzione, per cui questo è uno dei modi più ragionevoli. 
+\end{itemize}
+
+\noindent Ho diversi modi per poter porre in esecuzione qualcosa e ritornare in contatto una volta staccato:
+
+\begin{itemize}
+    \item ottenere i log delle istanze in esecuzione e terminate (metodo standard).
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker logs dt-daemon
+\end{minted}
+    \item attaccarsi allo stdin/out del (processo in un) container in esecuzione.
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker attach --sig-proxy=false dt-daemon
+\end{minted}
+    \item eseguire un altro processo in un container in esecuzione.
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker exec dt-daemon ps -a
+\end{minted}
+\end{itemize}
+
+\subsection{Persistenza e comunicazione}
+
+Il modo più ragionevole per rendere persistenti le informazioni in Docker è l'utilizzo di un volume. 
+Un volume è un'astrazione di un volume fisico (un piccolo filesystem). 
+
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker volume create dt-volume
+\end{minted}
+
+\noindent Il volume è nel filesystem della macchina ospite, per cui è molto difficile condividerlo tra container su macchine diverse. Può essere letto e scritto (anche con esecuzioni ephemeral) nel seguente modo:
+
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker run --rm --volume dt-volume:/data busybox sh -c 'date > /data/file.txt'
+$ docker run --rm --volume dt-volume:/data busybox sh -c 'cat /data/file.txt'
+\end{minted}
+
+\noindent L'opzione --volume monta il volume dt-volume nel mount point /data.\\
+
+\noindent I comandi per la gestione dei volumi sono:
+
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+docker volume ls, docker volume rm, docker volume inspect
+\end{minted}
+
+\noindent Per poter operare sul filesystem host, si può, anche se sconsigliato, mappare una directory del filesystem host (quello su cui viene eseguito Docker) all'interno del container.
+
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker run -it --rm -v $(pwd):/data busybox sh -c 'date > /data/file.txt'
+\end{minted}
+
+\noindent Esiste inoltre il comando cp per copiare i file dai volumi di Docker al filesystem e viceversa. Questo ha come target un container.
+
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ CID=$(docker create --volume dt-volume:/data busybox)
+$ docker cp $CID:/data/file.txt file2.txt
+$ docker cp file2.txt $CID:/data/file3.txt
+$ docker rm $CID
+$ docker run --volume dt-volume:/data busybox cat /data/file3.txt
+\end{minted}
+
+\noindent Per porre in comunicazione container diversi si utilizzano le reti, con cui creiamo un segmento di rete al quale diamo un nome e in cui mettiamo dei container.
+
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker network create dt-network
+$ docker run --network dt-network --name dt-nc --rm -it busybox nc -l -p 80
+\end{minted}
+
+\noindent Il nome che ha un container sulla rete è il suo stesso nome. È possibile comunicare con un container a partire da un container sulla stessa rete.
+
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker run -it --rm --network dt-network busybox sh -c 'date | nc dt-nc 80'
+\end{minted}
+
+\noindent Per rendere pubblico un servizio di rete in un container, è possibile pubblicare una porta (-p) nel seguente modo:
+
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+$ docker run --name dt-nc --rm -it -p 80 busybox nc -l -p 80
+\end{minted}
+
+\noindent I comandi per la gestione delle reti sono:
+
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{bash}
+docker network ls, docker network rm, docker network inspect
+\end{minted}
+
+\subsection{Docker dal punto di vista dei developer}
+
+Dal punto di vista del developer possiamo:
+
+\begin{itemize}
+    \item utilizzare Docker per testare la compilazione/esecuzione con development kit diversi, in maniera veloce.
+    \item utilizzare l'IDE all'interno di un container, mettendolo in esercizio con tutto quel che serve e velocizzando quindi l'onboarding.
+\end{itemize}

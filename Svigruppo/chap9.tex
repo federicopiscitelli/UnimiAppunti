@@ -1,0 +1,237 @@
+\section{Design by Contract}
+Se usate estensivamente, le asserzioni possono costituire una vera e propria specifica delle componenti del sistema.\\
+L’idea della progettazione per contratto (B. Meyer, 1986) è che il linguaggio per descrivere specifiche e implementazioni è lo stesso: la specifica è parte integrante del codice del sistema.\\
+La specifica è parte del “contratto” secondo cui ciascun componente fornisce i propri servizi al resto del sistema.\\
+Tentativo di avere progettazione e scrittura con lo stesso linguaggio (What e How con lo stesso linguaggio).\\
+Il contratto è la descrizione di cosa voglio che mi permette di controllare il funzionamento del sistema.
+
+\subsection{Tripla di Hoare}
+L'idea di contratto si basa su un concetto più antico: la tripla di Hoare. 
+Quando si parla di questa tripla si fa riferimento a degli articoli (scritti da Hoare e Floyd) in cui si cercava di definire una logica formale assiomatica che permettesse di dedurre assiomaticamente la semantica di un programma a partire dalla semantica delle singole istruzioni. Con un sistema del genere non si riesce a dimostrare la correttezza del programma, ma si riesce a descrivere in maniera dichiarativa che cosa fa.
+\begin{center}
+    \[\{P\}S\{Q\}\]
+\end{center}
+Ogni esecuzione di S che parta da uno stato che soddisfa la condizione P (pre-condizione) termina in uno stato che soddisfa la condizione Q (post-condizione). Ogni programma che termina è corretto sse vale la proprietà precedente. \\
+La tripla di Hoare {P}S{Q} può diventare un contratto fra chi implementa (fornitore) S e chi usa (cliente) S:
+\begin{itemize}
+    \item l'implementatore di S si impegna a garantire Q in tutti gli stati che soddisfano P
+    \item l'utilizzatore di S si impegna a chiedere il servizio in uno stato che soddisfa P ed è certo che se S termina, si giungerà in uno stato in Q vale
+\end{itemize}
+Il lavoro dell'implementatore è particolarmente facile quando: Q è true (vera per ogni risultato) o quando P è False (l'utilizzatore non riuscirà mai a portare il sistema in uno stato in cui tocchi fare qualcosa). Weakest precondition (data Q) o strongest postcondition (data P) determinano il ruolo di una feature.
+
+
+\subsection{Eiffel}
+Un linguaggio object-oriented che introduce i contratti nell'interfaccia delle classi. Il contratto di default per un metodo ("feature") F è {True}F{True}.\\
+Altri linguaggi di programmazione offrono delle librerie per applicare il design by contract, ma queste, tuttavia, sono solo delle approssimazioni.
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{eiffel}
+feature
+ decrement
+ -- Decrease counter by one.
+     require
+      item > 0 -- pre-condition
+     do
+      item := item - 1 -- implementation 
+     ensure
+      item = old item - 1 -- post-condition
+     end
+\end{minted}
+:= assegnamento in eiffel (equivalente a = in java)\\
+= predicato logico in eiffel (equivalente a == in java)\\\\
+
+\noindent Eiffel è esplicitamente progettato come linguaggio "di progetto", non solo "di programmazione": 
+\begin{quote} "specify, design, implement and modify quality software" \end{quote}
+“Programmazione in grande” (programmo un sistema enorme che non può essere pensato e realizzato da una sola persona) con oggetti, derivati da classi organizzate in gerarchie di ereditarietà e raggruppate in cluster, che forniscono feature (command o query) ai loro client. Ogni singola feature è una S di cui posso specificare P e Q.\\
+La violazione del contratto diventa un modo per stabilire un errore nell'accordo o un difetto nell'implementazione.\\
+In un senso formale, si può parlare di design by contract solo con Eiffel. \\
+I contratti, se usati bene, possono diventare lo strumento con il quale gli sviluppatori si accordano. \\
+Per scrivere dei contratti scriveremo del codice, ovvero dei metodi. 
+Le pre e post condizioni non sono fatte per aggiungere funzionalità, ma servono solo per asserire e per verificare lo stato del mondo prima o dopo l'esecuzione della feature.\\
+Le \textbf{feature} sono attributi e metodi della classe. Possono avere una visibilità (private, public) che viene definita come feature {NONE} o feature {ANY}.\\
+Le asserzioni possono essere suddivise in:
+\begin{itemize}
+    \item \textbf{pre/post-condizioni} sulla feature: \textit{require, ensure}
+    \item \textbf{invarianti di classe}: \textit{invariant}
+    \item \textbf{asserzioni}: \textit{check}
+    \item \textbf{inviarianti di ciclo}: \textit{from ...... invariant ..... until .... variant .... loop....end}
+\end{itemize}
+L'\textbf{invariante di una classe} sono condizioni che devono essere vere in ogni momento “critico”, ossia osservabile dall’esterno. È una proprietà che tutti gli oggetti di quella classe mantengono durante la loro vita.\\
+Ad esempio: per la classe persona che ha una feature età, un'invariante di classe potrebbe essere età maggiore di zero.
+Si possono tradurre in pre e post condizioni che devono valere sempre per tutti i metodi, ad eccezione dei costruttori: nel costruttore l'invariante deve valere solo dopo la creazione dell'oggetto (poichè prima non c'era e l'ho dovuto creare).\\
+Nell'invariante si può fare tutto, l'importante è che il risultato sia un valore logico. Di solito non conviene mettere if e else, ma si usano gli implies.\\
+L' \textbf{invariante di ciclo}: rende decidibile un ciclo (posso sapere quando termina).\\
+È buona norma dare sempre nomi alle invarianti, alle pre e post condizioni per risalire più facilmente alla causa dell'errore.\\
+
+\noindent Con Eiffel è possibile avere un supporto run-time alle violazioni:  se una condizione non vale viene sollevata un’eccezione (al posto che avere il catch come in Java abbiamo la rescue). L’eccezione porta il sistema nel precedente stato stabile ed è possibile:
+\begin{itemize}
+    \item terminare con un fallimento
+    \item riprovare
+\end{itemize}
+
+Spesso potrebbe sembrare di scrivere le stesse cose due volte:
+\begin{minted}[bgcolor=LightGray, fontsize=\footnotesize]{eiffel}
+do
+ balance := balance - x 
+-----------
+ensure
+ balance = old balance - x
+\end{minted}
+Una è l'implementazione, l'altra è la specifica; una mi serve per dire cosa voglio, l'altra per dire come lo voglio.\\
+Il client è responsabile delle precondizioni, il fornitore di postcondizioni e invarianti.\\
+\textit{Old} indica lo stato dell'oggetto prima dell'esecuzione. \\
+
+\noindent In Eiffel ci sono altri operatori logici:
+\begin{itemize}
+    \item \textit{implies}: equivale a not a or a and b. se a, b, sennò qualsiasi cosa. ??????
+    \item \textit{and} e \textit{or} non cortocircuitate.
+\end{itemize} 
+In Eiffel ci sono le classi astratte(\textit{defer}).\\
+Nelle pre-condizioni non si possono usare feature private, nelle post-condizioni sì, siccome le pre-condizioni le deve poter valutare il client.
+\subsection{Eiffel Studio}
+Eiffel Studio è l'unico IDE integrato con il linguaggio e con l'idea di design by contract.\\
+Esistono diverse viste che mostrano ognuna il programma da prospettive diverse:
+\begin{itemize}
+    \item Text è quella che si usa quando si deve programmare. Eiffel ragiona sui file e questa è la visione per file.
+    \item Contract è quella che si usa per ragionare a contratto. Fa vedere solo le feature senza implementazione (che in questo caso è irrilevante)
+    \item Flat fa vedere tutte le feature, anche quelle ereditate
+    \item Interface è la visione flat, ma solo dei contratti
+    \item Clickable mostra i diagrammi delle classi (?)
+\end{itemize}
+
+\subsubsection{Contratti ed ereditarietà}
+Il principio di sostituzione di Liskov stabilisce che, perchè un oggetto di una classe derivata soddisfi la relazione is-a, ogni suo metodo:
+\begin{itemize}
+    \item deve essere accessibile a pre-condizioni uguali o più deboli del metodo della superclasse;
+    \item deve garantire post-condizioni uguali o più forti del metodo della superclasse;
+\end{itemize}
+Altrimenti il “figlio” non può essere sostituito al “padre” senza alterare il sistema.\\
+
+\noindent\textbf{Principio di sostituibilità}: il compilatore dovrebbe dimostrare automaticamente che \[PRE_{parent} \Longrightarrow PRE_{derivata}\]
+\[POST_{derivata} \Longrightarrow POST_{parent}\]
+\begin{enumerate}
+    \item in un programma corretto non può succedere che \(PRE_{parent}\) valga e \(PRE_{derivata}\) no; l’oggetto evoluto deve funzionare in ogni stato in cui funzionava l’originale:  non può avere obbligazioni più stringenti, semmai più lasche.
+    \item in un programma corretto non può succedere che valga \(POST_{derivata}\) ma non \(POST_{parent}\); un stato corretto dell’oggetto evoluto deve essere corretto anche quando ci si attende i benefici dell’originale.
+\end{enumerate}
+
+
+Un modo per garantire che le due condizioni siano automaticamente vere consiste nell'assumere implicitamente che, se la classe evoluta specifica esplicitamente una precondizione P e una postcondizione Q le reali pre e post condizioni siano:
+\[PRE_{derivata}= PRE_{parent} \lor P\]
+\[POST_{derivata} = POST_{parent} \land Q\]
+Eiffel introduce quindi un meccanismo sintattico che obbliga a rispettare il principio di Liskov. Il compilatore dovrebbe dimostrare che le pre-condizioni della classe base implicano quelle della derivata. Dualmente vale la stessa cosa sulle post-condizioni. Nel caso generale questo è indecidibile e impossibile. Eiffel costringe il programmatore a scrivere solo cose dimostrabili.\\ 
+Le pre-condizioni derivate sono sempre obbligatoriamente in OR con quelle del parent. Per fare questa cosa si utilizza la parola chiave \textit{require else}, cioè sono le pre-condizioni di prima, altrimenti quelle di adesso. Stesso ragionamento duale vale per post-condizioni. Le post-codizioni derivate sono in AND quelle di prima (parola chiave \textit{ensure then}). \\\\
+Nell'esempio del programma ANIMAL visto a lezione:
+\begin{itemize}
+    \item Animale mangia Cibo (is\_a Cosa)
+    \item Mucca (is\_a Animale) mangia Erba (is\_a Cibo)
+\end{itemize}
+Questa \textbf{covarianza} è contraria al principio di Liskov perchè restringe le precondizioni. La controvarianza (Mucca mangia Cosa, Sather) e l'invarianza (Mucca mangia Cibo, Java) vanno bene. Eiffel invece è covariante il che, impedendo un controllo di conformità statico, introduce parecchie complicazioni come ad esempio CATcall, runtime type identification...\\
+
+\subsubsection{Eccezioni}
+Nel modello di Eiffel hanno un ruolo importante le \textbf{eccezioni}, che vengono trattate in un modo differente da quello dei più diffusi linguaggi di programmazione.
+\begin{quote}
+    An exception is a run-time event that may cause a routine call to fail (contract violation). A failure of a routine causes an exception in its caller.
+\end{quote}
+Abbiamo la possibilità di gestirle in due modi:
+\begin{enumerate}
+    \item \textbf{Failure} (panico organizzato): pulisce l'ambiente, termina la chiamata e riporta il fallimento al chiamante
+    \item \textbf{Retry}: cerca di cambiare le condizioni che hanno portato all'eccezione e riesegue la routine dall'inizio
+\end{enumerate}
+Per trattare il secondo caso, Eiffel introduce il costrutto \textit{rescue/retry}. Se il corpo del rescue non fa retry, si ha un failure.
+
+\subsubsection{Correttezza}
+Per ogni feature (pubblica) f:\\
+\begin{itemize}
+    \item \(\{PRE_f \land INV\} body_f \{POST_f \land INV\}\)
+    \item \(\{True\} rescue_f \{INV\}\)
+    \item \(\{True\} retry_f \{INV \land PRE_f\}\)
+\end{itemize}
+
+\begin{comment}
+
+#################################
+Simo
+
+Non abbiamo solo dei svantaggi ma anche vantaggi.
+Il lavoro dell'implementatore è particolarmente facile quando: Q è True (vera per ogni risultato!) o quando P è False (l’utilizzatore non riuscir`a mai a portare il sistema in uno stato in cui tocchi fare qualcosa!). Weakest precondition (data Q) o strongest postcondition (data P) determinano il ruolo di una feature.
+
+Eiffel è un linguaggio orientato agli oggetti che introduce i contratti nell'interfaccia delle classi. 
+Gli oggetti non lavorano con i metodi ma con le feature.
+Le feature possono avere dei vincoli di visibilità (come public, private in java). 
+
+require : (pre-condizione) 
+do : (implementazione) è un ordine, un comando da eseguire
+ensure : (post-condizione) predicato logico, controllo. Come ti aspetti che il mondo sia)
+
+feature 
+    decrement
+    
+    require
+        item > 0
+    do
+        item := item - 1
+    ensure
+        item = old item - 1
+    end
+
+In require ho la post-condizione che deve essere verificata, se non ho item > 0, il contratto fallisce. In do ho l'implementazione, in questo caso un assegnamento e in ensure viene definito il fatto che al termine item avrà lo stesso valore decrementato di 1.
+Le post-condition sono simili all'implementazione. 
+
+C'è la classe da cui si inizia: root class
+Da questa root class devo poter creare gli altri oggetti. 
+Ogni classe ha un costruttore.
+La feature none è accessibile solo a sé stessa (simile al private)
+make 
+
+
+feature {NONE}
+è accessibile solo dalla classe
+
+feature {ANY}
+è accessibile da tutte le classi
+ 
+Il compilatore di Eiffel lavora guidato da un file di progetto.
+
+LEZIONE XV: Design by Contract con Eiffel
+È un linguaggio ad oggetti tipizzato. Si distinguono le feature che hanno un ruolo di comando e di interrogazione. 
+Abbiamo le classi, il raggruppamento di esse (cluster, a differenza di Java che si chiamano package). 
+Le feature possono essere command o query.
+
+In Java abbiamo sia metodi che attributi, in Eiffel sia i metodi che gli attributi sono rappresentati da feature ovvero le cose che posso fare con un oggetto. 
+
+Nelle pre e post-condizioni sarà opportuno usare solo query. 
+
+feature{ANY} significa che le feature sono accessibili da tutto il programma.
+require --> pre-condizione
+ensure --> post-condizione (cosa deve valere dopo la post condizione). Se la post-condizione torna true, il contratto è soddisfatto.
+
+L'invariante è una proprietà che gli oggetti mantengono durante tutta la vita.  
+Se non vale l'invariante allora viene violato il contratto.
+Viene aggiunta con l'operatore "and" ad ogni post-condizione.
+
+Eiffel fornisce il meccanismo di trattamento della violazione.
+La violazione è un'eccezione e posso fare un rescue (catch), ovvero un salvataggio, passo ad una situazione di emergenza, di recupero. Quando abbiamo un'eccezione in Java ci accorgiamo con il catch, in Eiffel questo evento si chiama "panico organizzato". 
+L'eccezione porta il sistema nel precedente stato stabile ed è possibile:
+- terminare con un fallimento
+- riprovare 
+
+Molto spesso vado a scrivere due volte le stesse cose ma in maniere diverse:
+- cosa voglio
+- come lo voglio
+È modo di metteresi in una prospettiva diversa e quindi di comprendere meglio ciò che si sta facendo. 
+
+#################################
+
+Omar
+
+#lezione 21
+
+Eiffel Studio è l'unico IDE integrato con il linguaggio e con l'idea di design by contract.
+View Text è quella che uso quando devo programmare. Eiffel ragiona sui file e questa è la visione per file.
+Se invece voglio ragionare per contratto, c'è la visione Contract, che non fa vedere tutto, ma solo le feature. L'implementazione in questo caso non è rilevante.
+La visione Flat fa vedere tutte le feature, anche quelle ereditate.
+La visione interface è la visione flat, ma solo dei contratti.
+La visione clickable diagrammi delle classi (?)
+
+Text sviluppatore
+Contract client
+
+\end{comment}
