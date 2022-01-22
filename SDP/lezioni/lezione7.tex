@@ -1,0 +1,368 @@
+La missione di Google è organizzare l'informazione globale affinché sia universalmente accessibile. I sistemi di Google memorizzano enormi quantità di dati, ad esempio: 
+
+\begin{itemize}
+    \item indici web
+    \item archivio cache delle pagine web
+    \item tutti i video di YouTube
+    \item informazioni di Maps e Street  View
+    \item dati Gmail
+    \item Google Photos
+    \item Google Drive
+\end{itemize}
+
+\section{Storage systems}
+
+Negli anni in Google sono state sviluppate molte diverse tecnologie di archiviazione. Codice e implementazione sono proprietari, ma i risultati sono spesso condivisi con la comunità di ricerca sotto forma di articoli e conferenze. Molte alternative open source sono state sviluppate da altre aziende, spesso anche con l'aiuto di Google.
+
+Esempi di queste tecnologie sono: Google File System, Bigtable, Spanner e F1.
+
+\section{Protocol buffers}
+
+Protocol buffer è una rappresentazione strutturata di dati, molto utile in applicazioni che prevedono il passaggio di dati da un server all'altro in maniera efficiente dal punto di vista del networking e del processing. 
+
+Definire un messaggio Protocol buffer è un po' come definire una struct o una classe. Utilizza una propria sintassi, ma viene compilato in classi native, supportando la maggior parte dei linguaggi. Tutto questo è open source.
+
+Si preferisce a JSON e XML per motivi di efficienza, compattezza e sicurezza rispetto alla retrocompatibilità.
+
+\section{GFS - Google File System}
+
+Google File System è un file system distribuito in modo massiccio e tollerante ai guasti che archivia e recupera i dati in modo efficiente.
+
+Fornisce primitive di accesso POSIX (open, read, write, close) ai file ed essendo distribuito consente l'accesso a diversi client simultaneamente. Inoltre, per garantire fault tolerance, archivia più copie dei dati su macchine diverse (ridondanza).
+
+\subsection{Colossus}
+
+L'implementazione originale di GFS ha ormai più di 15 anni. Per soddisfare i nuovi requisiti, attualmente Google utilizza una nuova tecnologia denominata Colossus che: 
+
+\begin{itemize}
+    \item utilizza la tecnologia Bigtable per archiviare i metadati 
+    \item aumenta i limiti di dimensione dei file
+    \item migliora la latenza 
+    \item diminuisce l'utilizzo dello spazio di archiviazione, includendo nuovi protocolli per la ridondanza dei dati (codifica Reed-Solomon, aumenta la ridondanza dei dati senza, però, dover necessariamente impiegare la stessa mole di dati su disco).
+\end{itemize}
+
+
+\begin{comment}
+
+L'implementazione attuale è evoluta e più decentralizzata. I client di GFS sono programmi che vogliono accedere a questi file. Accedono ai file tramite due tipi di flow:
+- control flow (nero): comunicano con dei server o processi master (anch'essi replicati). Chiedendo dove possono localizzare i file. I master danno una lista di locazioni in cui sono disponibili. File vengono separati in diversi frammenti e ciascuno di questi viene copiati attraverso diversi chunkserver. Il master comunica che il file è diviso in N chunks e dove si trovano questi.
+- data flow (verde)
+
+\end{comment}
+
+\section{Bigtable}
+
+Bigtable è il primo dei cosiddetti database NoSQL, database che violano il paradigma di SQL e le sue tipiche proprietà. Introduce diverse assunzioni al fine di riuscire ad archiviare moli di dati enormemente maggiori, mantenendo però una certa efficienza in termini di latenza. Consiste in una mappa chiave-valore ordinata, distribuita e multidimensionale, progettata per memorizzare miliardi di record e scalare su migliaia di macchine in uno stesso datacenter. Inoltre fornisce delle utility per replicare dati su diversi datacenter, permettendo la comunicazione tra due istanza di Bigtable situate in datacenter differenti. Inizialmente era basato su GFS.
+
+Ogni riga è composta da un numero arbitrario di colonne e per ogni coppia riga-colonna sono associate diverse celle. Infatti, Bigtable fornisce anche la dimensione temporale: data una riga e una colonna, possono essere salvate più celle, ciascuna annotata con un certo timestamp. L'idea è che si possano avere diverse versioni di un certo dato. Inoltre, tutti i tipi di dato sono stringhe e la conversione, così come la scelta del timestamp, è lasciata allo sviluppatore.
+
+Queste tabelle vengono divise in intervalli di record (gruppi di record adiacenti da circa 100-200MB di dati) chiamati tablet. I tablet sono distribuiti tramite diversi tablet server, ciascuno dei quali è responsabile di circa 100 tablet. In un'istanza di Bigtable si possono avere chunk di tabelle di diversi servizi, ciascuna con le proprie regole. Il sistema deve garantire:
+
+\begin{itemize}
+    \item Fast recovery: le 100 tablet che un server (andato offline) aveva vengono rese disponibili dal sistema. Gli altri server cominceranno a contendersele e verranno distribuite, un tablet per ciascuno. Il master mantiene un indice di tutti i tablet disponibili e dei server che li hanno in carico. Quando un server non risponde più, il master sa quali tablet sono rimasti "orfani" e contatta tutti gli altri oppure distribuisce in maniera opportunistica. La macchina che gestisce i tablet ha solamente il compito di mantenere e aggiornare questi tablet su GFS, ma, se va offline, il dato è già altrove.
+    \item Fine-grained load balancing: spostare i tablet da una macchina sovraccarica. Il master prende decisioni in merito al bilanciamento del carico.
+\end{itemize}
+
+Problemi di Bigtable:
+
+\begin{itemize}
+    \item non supporta le transazioni: l'atomicità è garantita solo a livello di riga. I Bigtable replicati sono coerenti solo alla fine, cioè se un client scrive all'interno del record un nuovo dato, un altro client non potrà mai vedere un valore intermedio nella scrittura
+    \item non supporta le tabelle relazionali: per applicazioni che richiedono schemi complessi e in evoluzione, Bigtable può essere difficile da usare
+\end{itemize}
+
+Altri sistemi sono stati realizzati a partire da Bigtable cercando di risolvere questi problemi, ad esempio Megastore per supportare le transazioni e la replica.
+
+\section{Spanner}
+
+Per diversi anni i ricercatori hanno studiato soluzioni più SQL-like senza dover sacrificare prestazioni in termini di scala, potendo così gestire la stessa quantità di dati. Un nuovo sistema, denominato Spanner, è stato studiato e sviluppato per anni per fornire maggiori garanzie di Bigtable rispetto alle transazioni e alla replica globale. 
+
+Spanner è un database multiversione distribuito che supporta le transazioni (ACID), la schematizzazione delle tabelle e un data model semi-relazionale. Utilizza il linguaggio SQL ed impone che le tabelle abbiano una sorta di gerarchia. Spanner è stato progettato per scalare su milioni di macchine, attraverso centinaia di datacenter, e salvare trilioni di righe di database.
+
+\begin{itemize}
+    \item mantiene il versionamento dei dati, anche se il timestamp è gestito dall'engine piuttosto che dal programmatore (il timestamp di ogni versione è quello di commit)
+    \item la distribuzione globale dei dati attraverso i datacenter è configurabile, ad esempio i dati possono essere spostati automaticamente più vicino agli utenti che li utilizzano più frequentemente
+    \item fornisce forti garanzie di consistenza:
+    \begin{itemize}
+        \item esterna di read e write, ossia per l'osservatore esterno ciascuna scrittura avviene in maniera atomica, quindi non potrà leggere dati parziali
+        \item possibilità di accedere ad una versione del database ad un certo punto nel tempo, con la garanzia che sia consistente in maniera globale
+    \end{itemize}
+\end{itemize}
+
+Spanner è costituito da un'unica istanza globale distribuita attraverso i datacenter (Bigtable, invece, prevede un'istanza differente per ciascun datacenter). Introduce un secondo livello di master: ciascun datacenter è costituito da una zona e per ciascuna zona si ha una pool di master locali, avendo quindi master distribuiti globalmente all'interno di ciascun datacenter. I dati sono distribuiti su server chiamati spanserver, ciascuno dei quali contiene 100-1000 tablet replicati attraverso diversi datacenter (zone). 
+
+Per garantire che il database evolva in maniera indipendente, il locking distribuito avviene a livello di ciascuna tablet, dunque tutte le altre possono essere scritte/lette senza problemi. Ad ogni transazione, il timestamp del commit e l'ottenimento del lock viene confermato tra le zone attraverso un protocollo Paxos. Spanner è dunque riuscito ad adattare i protocolli di consenso a livello globale. Per evitare i possibili errori sulla precisione del tempo è stata definita una particolare rappresentazione del tempo che aggiunge incertezza (TrueTime), attraverso la quale il lock viene richiesto per un intervallo di tempo intorno a x. Questo garantisce che il sistema di lock abbia performance di latenza accettabili.
+
+\section{F1}
+
+Inizialmente Spanner non prendeva in considerazione diversi aspetti aggiuntivi di un database SQL, per potersi focalizzare sull'avere un engine che potesse essere utilizzato per un diverso spettro di applicazioni. Tuttavia certe applicazioni avevano bisogno di dati particolarmente complessi dal punto di vista delle relazioni, dunque il team responsabile di Spanner cominciò a lavorare su un layer addizionale di accesso a Spanner, chiamato F1, che introducesse alcune feature, in particolare:
+
+\begin{itemize}
+    \item schema relazionale: un engine che consentisse di
+    \begin{itemize}
+        \item mantenere gli indici consistenti
+        \item utilizzare tipi di dato diversi dalle stringhe, in particolare protocol buffer
+        \item evolvere lo schema del database senza causare un particolare downtime
+    \end{itemize}
+    \item interfacce multiple: SQL, key/value R/W, MapReduce
+    \item notifiche di cambiamento:  un engine di notifica nel momento in cui certi dati nel database cambiano. Questo fu inizialmente sviluppato on top of Spanner e successivamente fu introdotto all'interno di Spanner per migliorare le performance e togliere un livello di indirection
+\end{itemize}
+
+F1 introduce un pool di worker per l'esecuzione distribuita di SQL ed effettuare ciò che Spanner non è in grado di fare, utilizzando quest'ultimo per lo storage dei dati su GFS. Il server di F1 è stateless. 
+
+Una delle caratteristiche di F1, come visto precedentemente, è la possibilità di utilizzare protocol buffer come tipo di dato all'interno del database. Nel momento in cui vengono serializzati, questi vengono archiviati come blob in Spanner. F1 estende la sintassi di SQL per la lettura di campi nidificati, ossia per fare riferimento ai valori dei campi del protocol buffer salvati all'interno di una colonna. Protocol buffer consente di semplificare schema e codice, poiché le app utilizzeranno gli stessi oggetti.
+
+\section{MapReduce}
+
+Il primo fondamentale contribuito da parte dei ricercatori di Google per il processing e la generazione di grandi set di dati è stato il modello di programmazione MapReduce. È stato progettato per funzionare con pool di macchine eterogenee, semplicemente connesse. MapReduce è basato su alcuni paradigmi di programmazione abbastanza comuni in programmazione funzionale e in alcuni linguaggi di programmazione. Può essere applicato a un'ampia varietà di problemi e consente il calcolo parallelo di problemi nella seguente forma: 
+
+\begin{itemize}
+    \item map: (k1, v1) $\rightarrow$ list(k2, v2)
+    \item reduce: (k2, list(v2)) $\rightarrow$ list(v2)
+\end{itemize}
+
+Dove k1 e v1 sono una mappa valore-chiave di input e v2 è l'output desiderato. Si presuppone, quindi, di ricevere un problema definito dal programmatore in termini di una o più operazioni di map, ovvero un'operazione che dato un insieme di chiavi-valori genera una lista di chiavi-valori, e una operazione di reduce, ovvero un'operazione che data una chiave e una lista di valori associata a quella chiave è in grado di computare un certo risultato. MapReduce, se si è in grado di modellare il problema in questi termini, può garantire la distribuzione del problema su diverse macchine. MapReduce raggruppa quindi i record emessi da varie funzioni di map distribuite che hanno la stessa chiave ed invoca la funzione reduce.
+
+Il sistema, inoltre, esegue un importante passaggio addizionale tra Map e Reduce, chiamato informalmente Shuffle. Shuffle è l'operazione di raggruppamento che MapReduce esegue per tutti i valori associati ad una chiave, cosi che si ottenga un record per ciascuna chiave con la lista dei valori associati ad essa.
+
+\begin{itemize}
+    \item map: (k1, v1) $\rightarrow$ list(k2, v2)
+    \item shuffle: list(k2, v2) $\rightarrow$ (k2, list(v2))
+    \item reduce: (k2, list(v2)) $\rightarrow$ list(v2)
+\end{itemize}
+
+Da un punto di vista architetturale, quando si scrive un programma MapReduce, quello che si ottiene è un binario che, a seconda di come viene invocato dalle diverse macchine (quali parametri), fa assumere alla macchina una diversa funzione nel sistema distribuito. Questo file viene distribuito su tutte le macchine che si vuole includere nella computazione. Una macchina assumerà il ruolo di master e tutte le altre assumeranno il ruolo di worker, pronte ad effettuare un lavoro su indicazione del master.
+
+L'interfaccia MapReduce fornisce delle librerie per poter leggere da differenti tipologie di datasource, ad esempio MapReader, per leggere da directory GFS e assegnare a ciascun worker un file differente, e BigtableMapReader, che istruisce i worker a leggere diversi tablet. Si ha quindi una libreria di lettura che distribuisce il carico di lavoro dell'input attraverso diversi worker, che invocano la funzione di Map sull'input, salvando l'output in alcuni file intermedi in un formato facilmente recuperabile per chiave. Nella parte di Reduce il worker recupera le emissioni per una certa chiave ed invoca la reduce, scrivendo in output alla fine.
+
+Ci sono molteplici applicazioni, di cui semplici esempi sono: 
+
+\begin{itemize}
+    \item Distributed Grep: trovare una parola/espressione regolare all'interno di molti file, utilizzando solo la funzione di map, che cerca la parola e se viene trovata emette il risultato, ed il resto lo fa il sistema
+    \item Count URL clicks: contare quante pagine sono state visitate avendo il log di un webserver. Basta emettere un numero per ogni pagina nel log e con la reduce vengono raggruppati tutti i numeri, ottenendo il punteggio
+    \item Reverse Web-Link graph: data una pagina nel grafo del web, calcolare tutte le pagine che hanno un link verso quella pagina. Viene distribuito il grafo del web su diverse macchine, ciascuna delle quali fa la scansione di una pagina e se trova il collegamento emette una coppia chiave-valore, dove la chiave è la destinazione dell'URL. Nella reduce viene raggruppato il tutto
+\end{itemize}
+
+È possibile concatenare più MapReduce per eseguire algoritmi più complessi, ma può iniziare a diventare ingestibile.
+
+\section{FlumeJava}
+
+FlumeJava è un framework e un nuovo modello di programmazione che evolve MapReduce, in cui vengono fornite delle API (primitive e funzioni costruite sopra a queste) per fare computazioni distribuite:
+
+\begin{itemize}
+    \item libreria Java per la scrittura di pipeline parallele ai dati
+    \item classi per raccolte (possibilmente enormi) immutabili
+    \item metodi per operazioni parallele ai dati
+    \item crea il grafo di esecuzione implicitamente tramite lazy execution
+\end{itemize}
+
+Si occupa anche di ottimizzare la computazione cercando di capire le possibili scorciatoie (fonde operazioni parallele ai dati e forma MapReduce) senza compromettere la validità dei dati ed è, inoltre, un executor che esegue il grafo di esecuzione ottimizzato e si occupa di garbage collection, parallelismo delle attività, tolleranza ai guasti e monitoraggio. Le primitive delle operazioni di base sono:
+
+\begin{itemize}
+    \item ParallelDo(DoFn)
+    \item GroupByKey
+    \item CombineValues(CombFn)
+    \item Flatten
+\end{itemize}
+
+FlumeJava non fa nulla dal punto di vista della gestione dei dati fin quando non viene eseguita la funzione run. Viene inizialmente definito il grafo di computazione, in cui ogni trasformata è un nodo. Ciascuna operazione di liberia può essere mappata su una MapReduce, ad esempio la funzione count in realtà esegue una map, una gbk e una combine. In questo modo è possibile ottenere un grafo di computazione più granulare. A questo punto, Flume può iniziare a mappare il problema in termini di successioni di MapReduce, cercando di individuare in maniera furba le funzioni che possono essere incorporate all'interno di una stessa fase di MapReduce.
+
+\section{MillWheel}
+
+Flume e MapReduce sono estremamente efficaci per l'elaborazione dei dati in batch e ciò significa che l'unico modo safe per elaborare nuovi dati di input è rielaborare tutto il set di dati di input, rieseguendo lo stesso MapReduce.
+
+Un team di sviluppo all'interno di Google ha sviluppato una soluzione simile a MapReduce per il caso continuo: MillWheel, un sistema per l'elaborazione di grossi flussi di dati (milioni di eventi al secondo). Il framework di MillWheel consente la creazione di sistemi di analisi in streaming, fornendo un modello di programmazione e un sistema di esecuzione:
+
+\begin{itemize}
+    \item il codice definito dall'utente viene eseguito in Computations
+    \item le Computations sono collegate tramite connessioni chiamate Streams
+    \item i record in ingresso vengono trasmessi come tuple (chiave, valore, timestamp) 
+\end{itemize}
+
+L'elaborazione e la distribuzione del processo sono per chiave. I calcoli possono accedere e modificare lo stato della chiave del record corrente, ad esempio per confrontare un nuovo input con un input precedente, impostare ed elaborare i timer, per effettuare ri-computazioni in maniera asincrona nel futuro, e produrre record. 
+
+Ciascuna computazione viene distribuite attraverso diverse macchine. Il criterio di distribuzione è molto simile a quello di Bigtable: dato l'insieme delle possibili chiavi in input, le chiavi vengono divise in range e ciascuna macchina si prende cura di un range di chiavi. Quando il coordinatore riceve un dato in input, a seconda della chiave, sa quale computazione eseguire. Se la computazione produce dati in output, avviene nuovamente la distribuzione, cercando quale istanza della computazione successiva ha in carico il range a cui appartiene la chiave, per eseguire la fase successiva della computazione (tramite RPC).
+
+Ogni computazione nel grafo rappresenta l'elaborazione di uno spazio delle chiavi (potrebbero essere diverse funzioni utente). I collegamenti sono percorsi shuffle su cui scorrono quadruple (chiave, valore, timestamp, numero di sequenza). I timestamp sono determinati dalla sorgente dei dati, non da MillWheel. Inoltre, ogni computazione è suddivisa in intervalli attraverso molti worker. Una singola chiave viene gestita da un singolo operatore alla volta, consentendoci di aggiornare in maniera consistente lo stato persistente per ciascuna chiave. 
+
+
+
+
+
+
+
+
+
+\begin{comment}
+Federico
+\section{Large Scale Data Storage and Processing on Google's Distributed Systems} 
+
+I sistemi di Google salvano un enorme quantità di dati tra cui:
+\begin{itemize}
+    \item indici web
+    \item cache di pagine web
+    \item video di YouTube
+    \item mappe e informazioni relative ad esse
+    \item dati di Gmail
+    \item foto
+    \item Drive
+\end{itemize}
+
+Le tecnologie di storage sviluppate da google sono molteplici e sono state rese disponibili come articoli di ricerche in alcune conferenze. Sono state sviluppate versioni open source di tecnologie che andremo ad approfondire.
+(Google File System, Bigtable, Spanner, F1).
+
+\subsection{Protocol buffer}
+rappresentazione strutturata dei dati utile in applicazioni di passaggio dati. 
+
+\subsection{GFS}
+Un file system massivo, distribuito e fault tolerance che salva e recupera in maniera efficiente i dati.
+Fornisce POISX base per file: open(), read(), write(), close()
+Permette a client multipli di accedere simultaneamente.
+Fornisce alta disponibilità salvando più copie in diverse macchine.
+
+\subsubsection{Architettura}
+foto
+
+\subsubsection{Colossus}
+L'implementazione originale di GFS risale a più di 15 anni fa. 
+Per assecondare i nuovi requisiti si usa una nuova tecnologia chiamata Colossus:
+\begin{itemize}
+    \item usa tecnologia bigdata per salvare metadati
+    \item aumenta il 
+\end{itemize}
+
+\subsection{Bigtable}
+È stato il primo db nosql. Salva grandissimi quantità di dati in maniera efficiente. È una mappa ordinata, distribuita e multi-dimensionale. È un db disegnato per salvare miliardi di record e per scalare su migliaia di macchine sullo stesso data center. Fornisce anche delle utility per replicare dei dati attraverso diversi datacenter che fanno comunicare diverse istanze di big table.
+Sfrutta GFS per salvare i dati e le tabelle
+immagine...
+Può essere vista come una mappa/tabella multidimensionale. Ogni record ha un id.
+Data riga e una colonna si possono salvare più informazioni nella stessa cella associate a diversi timestap. (Bigtable fornisce la dimensione temporale)
+
+\paragraph{Tablets}
+Vengono divise le tabelle in diverse righe e vengono splittate in tablets. Ogni tablet è tra i 100/200MB.
+Ogni tablet è disposto su server chiamati tablet server (?) che riescono a tenere fino a 100 tablets. 
+Nella stessa macchina potremmo avere chunk che fanno parte di diverse tabelle, diversi servizi ecc ecc..
+Un tablet server è in grado di contribuire alla fault tolerance.
+
+\subsection{Spanner}
+big table non supporta le relazioni tra le tabelle e non supporta le transazioni. 
+È stato creato così studiato e sviluppato Spanner un db che fornisse transazioni e replicazioni.
+Spanner è un database distribuito multiversione che fornisce:
+\begin{itemize}
+    \item transazioni ACIDE
+    \item SQL query language
+    \item tabelle schematizzate
+    \item modello dei dati semi-relazionale
+\end{itemize}
+
+Spanner è progettato per scalare su milioni di macchine su migliaia di datacenter e salvare trilioni di righe di db.
+I dati sono versionati
+La distribuzione dei dati è configurabile
+forti garanzie di consistenza
+
+\subsubsection{Implementazione}
+foto
+
+\subsection{F1}
+Ha uno schema relazionale con indici consistenti. 
+Interfacce multiple SQL, key value R/W, MapReduce
+Notifica di cambiamento (tipo pub/sub)
+
+\subsection{MapReduce}
+Modello di programmazione per processare e generare grandi dataset.
+Può essere applicato a una grande quantità di problemi. 
+Consente la computazione parallela di problemi nella seguente forma:
+map: (k1,v1) -> list(k2,v2)
+reduce: (k2, list(v2)) -> list(v2)
+dove k1 e v1 è un input chiave valore e v2 è l'output desiderato.
+
+Esempio: contare il numero di occorrenze di ogni parola in un set di documenti.
+La funzione di map emette un simbolico 1 per ogni parola
+Reduce viene chiamata per ogni parola univoca con la lista di valori associata alla parola.
+
+\subsubsection{Architettura}
+immagine
+
+\subsection{MillWheel}
+
+
+
+---------------------------------
+
+Che tristezza
+
+La missione di google è organizzare l'informazione globale affinché sia universalmente accessibile. I sistemi Google gestiscono diverse tipologie di dati:
+- indici web
+- storage per salvare le pagine web
+- tutti i video di youtube
+- informazioni di maps e street  view
+- gmail
+- google photos
+- google drive
+- ecc...
+
+Tecnologie di storage
+Diverse tecnologie di storage sono state sviluppate da Google e rese disponibili sotto forma di articoli di ricerca a varie conferenze. Rimangono interni, ma sono state sviluppate da altre grosse aziende varianti open source, spesso anche con l'aiuto di Google.
+
+Protocol buffer è una rappresentazione strutturata dei dati molto utile in applicazioni che prevedono il passaggio di dati da un server ad un altro in una maniera efficiente dal punto di vista di networking e di processing. Definire un messaggio di protocol buffer è un po' come definire una struct o una classe. Ha una sua sintassi, però, e una volta creato si può maneggiare in qualsiasi linguaggio di programmazione e inviarlo in altri componenti del sistema distribuito. Tutto questo è open source.
+
+Google File System
+Filesystem distribuito attraverso moltissime macchine. Fornisce primitive di accesso ai file (primitive POSIX (standard): open, read, write, close). Essendo distribuito consente accesso a diversi client simultaneamente. Per garantire fault tollerance copia i dati (molte copie di dati) per avere ridondanza. L'implementazione attuale è evoluta e più decentralizzata. I client di GFS sono programmi che vogliono accedere a questi file. Accedono ai file tramite due tipi di flow:
+- control flow (nero): comunicano con dei server o processi master (anch'essi replicati). Chiedendo dove possono localizzare i file. I master danno una lista di locazioni in cui sono disponibili. File vengono separati in diversi frammenti e ciascuno di questi viene copiati attraverso diversi chunkserver. Il master comunica che il file è diviso in N chunks e dove si trovano questi.
+- data flow (verde)
+
+Tecnologia moderna di GFS: Colossus
+Integra salvataggio di metadati relativi i file e migliora prestazioni di GFS in termini di dimensione dei file e latenza di recupero dei file. A seconda dell'applicazione che si sta scrivendo, può essere importante ottimizzare certi aspetti. Colossus include nuovi protocolli per la ridondanza dei dati (Reed-Solomon, aumenta la ridondanza dei dati senza, però, dover necessariamente impiegare la stessa mole di dati su disco).
+
+Bigtable
+Il primo dei cosiddetti database nosql, database che rompevano il paradigma di usare sql e le sue tipiche proprietà. Semplifica molte assunzioni per riuscire a salvare moli di dati maggiori (enormemente), mantenendo un cerca efficienza in termini di latenza. È una grossa mappa chiave-valore (anche multi-dimensionale). Disegnato per salvare miliardi di record e scalare su migliaia di macchine nello stesso datacenter. Fornisce delle utility per replicare dei dati attraverso diversi datacenter facendo comunicare due istanza di bigtable che sono in differenti datacenter. Nella sua versione iniziale utilizzava GFS.
+Big-table si può vedere come una gorssa mappa multi-dimensionale. Tutti i tipi sono stringa, la conversione è lasciata allo sviluppatore.
+
+Ogni riga ha un unmero arbitrario di colonne. Data una riga e un colonna, si possono associare le celle associate a quella riga-colonna. Bigtable fornisce anche la dimensione temporale. Si possono salvare, data una riga e un colonna, più celle, ciascuna annotata con un certo timestamp. La scelta del timestamp è lasciata allo sviluppatore. L'idea è che si possono avere diverse versioni di un certo dato. 
+
+Queste tabelle vengono divise in intervalli di record (in senso verticale, ovvero gurppi di record adiacenti). Ciascun gruppo diventa un tablet (chunk) e viene allocata in un tablet server. Bigtable decide quali sono gli splitting table a seconda di varie metriche (la prima è sicuramente la dimensione). Le tablet vengono distribuite tramite diversi tablet server e ciascun server è in carica di tenere all'incirca 100 tablet. In un'istanza di bigtable si possono avere tabelle di diversi servizi. Nella stessa macchina si possono avere chunk di tabelle di diversi servizi, con diverse regole di accesso, ecc. Il sistema deve anche contribuire alla fault tolerance. Le 100 tablet che un server aveva (che è andato giù) vengono rese disponibili dal sistema. Tutti gli altri server cominciano a contendersele e vengono distribuite.
+
+Il master ha un'indice di tutte le tablet disponibili e quali server hanno quelle. Quando il server non risponde più, il master sa quali tablet sono orfane e contatta tutti quanti/distribuisce in maniera opportunistica.
+
+L'engine di bigtable non fornisce supporto alle relazioni. L'unica garanzia di atomicità è per record: se un client scrive all'interno del record un nuovo dato, un altro client non verrà mai un valore intermedio nella scrittura.
+
+Per diversi anni i ricercatori hanno cercato soluzioni più sql-like senza sacrificare le prestazioni in termini di scala. Si voleva poter gestire la stessa quantità di dati. Spanner è un database multiversion, diverse versioni temporali del dato. Supporta le proprietà ACIDE, supporta la schematizzazione delle tabelle e supporta un data model semi-relazionale. C'è l'imposizione che le tabelle abbiano una sorta di gerarchia. Disegnato per scalare su un milione di macchine e salvare trilioni di righe di database.
+Mantiene data versioning, anche se timestamp è gestito dall'engine piuttosto che lasciarlo al programmatore. La distribuzione dei dati attraverso datacenter è configurabile. Fornisce forti garanzie di consistenza (esterna di read e write, ossia all'osservatore esterno ciascuna scrittura avviene in maniera atomica, non si vanno a leggere dati parziali, o quella prima o quella dopo, e fornisce la possibilità di accedere ad una versione del database ad un certo punto nel tempo, avendo garanzia che sia consistente in maniera globale),
+
+Spanner ha una sola istanza globale distribuita attraverso i datacenter (bigtable un istanza per ciascun datacenter). C'è un altro livello di master: master distribuiti globalmente all'interno di ciascun datacenter, si hanno diverse zone, ciascun datacenter ha un zona, e per ciascuna zona c'è una pool d master locali. Il dato è distribuito su server molti simili ai server di bigtable che si chiamano span server. Ciascuno spanserver contiene 100-1000 tablet che sono replicate attraverso diversi datacenter (bigtable forse no, ho preso male gli appunti sopra). Le tablet, che sono intervalli di record di tabelle relazionali, sono la chiave da tenere in considerazione quando si considera la concorrenza. Per garantire che il database possa evolvere in maniera indipendente, il locking avviene a livello di ciascuna tablet. Le altre si possono scrivere e leggere senza problemi. Ciascuna transazione, i diversi spanserver avviano un protocollo Paxos per decidere chi ottiene il lock e la challenge in questo caso è che essendo i diversi ocmponenti in diversi dataserver ed essendo questi distanti, dovendo considerare diversi errori sulla precisione del tempo, uno dei maggiori contribuiti di spanner è l'essere riuscito ad adattare protocolli di consenso a livello globale. Il trucco sta nel definire una particolare rappresentazione del tempo che aggiunge un certa incertezza, chiede il lock per un intervallo di tempo intorno a x. Garantisce che si possa tenere un sistema di lock con performance di latenza accettabili. Nella prima versione di spanner molti aspetti aggiuntivi di un database SQL erano stati tenuti fuori, per foclaizzarsi sull'avere un engine che potesse essere utilizzato per un altro spettro di applicazioni. In realtà, certe applicazioni che avevano bisogno di dati particolarmente complessi dal punto di vista delle relazioni (dati di advertising), il team responsabile cominciò a lavorare su un layer addizionale per accedere a spanner che aggiungere alcune feature, in particolare un engine che consentisse di mantere indici consistenti, utilzizare come datatype per i record, datatype diversi dalle semplici stringhe, in particolare protocol buffer, e un meccanismo per evolvere lo schema del database senza causare un particolare downtime. Inoltre, consentiva di avere un engine di notifica quando certi dati nel database cambiavano. Questo fu sviluppato on top di spanner e nel tempo sono state aggiunge all'interno di spanner per migliorare performance e togliere un livello di indirection.
+Questo si chiama F1. Ha un pool di worker, fa cose che spanner non fa e utilizza spanner come database (?). Una delle caratteristiche in f1 è utilizzare protocol buffer come tipo di dato all'interno del database. Nel momento in cui vengono serializzati diventano blob. F1 consente di scrivere sql query in cui il sql statamente può fare riferimento a valori dei campi del protocol buffer salvati all'interno di un colonna. 
+F1 consente proto join che è come avere una join su una tabella esterna, ma sui dati salvati nel protocol buffer (?).
+
+Il master è sempre al corrente di quale sono le tablet e chi in quel momento ha in carica certe tablet. Una volta che scopre che un server è down, assegna le tablet ad altri server. La macchina che gestisce i tablet è solamente una macchina che ha in carico di mantenere e aggiornare questi tablet su GFS, ma se la macchine va giù, il dato è già altrove.
+
+MapReduce
+Il primo grosso contribuito dei ricercatori di Google per processare i dati è stato mapreduce. È stato disegnato per funzionre in pool di macchine eterogenee, connesse e niente più. Sistemi precedenti erano disegnti per cluster o super computer con certe caratteristiche. MapReduce non è solo un sistema per distribuire le computazioni, ma è basato su alcuni paradigmi di programmazione abbastanza comuni in programmazione funzionale e alcuni linguaggi di programmazione. Si presuppone di prende un problema definito dal programmatore in termini di una o più operazioni di map, overra un'operazione che dato un isnieme di chiavi-valori genera una lista di chiavi valori. Come parte dello stesso problema, una operazione di reduce, ovvero un'operazione che data una chiave una lisa di valori associata a quella chiave è in grado di computare un certo risultato. MapReduce, se si è in grado di modellare il problema in questi termini, può garantire di distrubire il problema su diverse macchine. Diversi algoritmi possono essere adattati in maniera più o meno semplice ad essere algoritmi di mapreduce. MapReduce raggruppa tutti i record emessi da varie funzioni di map distribuite che hanno la stessa chiave e fornisce tutti i valori e invoca la funziona reduce (? noccapito). Shuffle è l'operazione di raggruppamento che mapreduce esegue di tutti i valori associati alla chiave cosi che venga fuori un record per ciascuna chiave con la lista dei valori associati ad essa.
+Da un punto di vista architetturale, quando si scrive un programma mapreduce, quello che viene fuori è un binario che a seconda di come viene invocato dalle diverse macchine (quali parametri), la macchina assume una diversa funziona nel sistema distribuito. Lo stesso binario viene distribuito su tutte le macchien che si vuole includere nella computazione. Una macchina prenderà il ruolo di master e tutte le altre prenderanno il ruolo di worker, pronte ad effettuare lavoro su indicazione del master. L'interfaccia MapReduce fornisce librerie per leggere da diversi tipi di datasource (es. leggere direcotry in GFS), forniscono dei mapreader per leggere da directory GFS e assegnre a ciascun worker un file differente. Altro esempio è bigtablemapreader che istruisce il worker a leggere diversi tablet. Si ha quindi una libreria di lettura che distribuisce il carico dell'input attraverso diversi worker, che invocano la funzione di map sull'input e l'output viene salvato in alcuni file intermedi. I file vengono salvati in un formato facilmente recuperabile per chiave. Nella parte di reduce il worker recupera le emissioni per una certa chiave e invoca la reduce e alla fine avviene anche la scrittura in outut. 
+Ci sono molte possibili applicazioni/algoritmi facilmente riducibili ad un algoritmo di tipo mapreduce:
+- grep distribuito (trovare parola/espressione regolare all'interno di molti file), utilizzando solo la funzione di map e il resto lo fa il sistema. Sarà un funzione di map che cerca la parola che lo sviluppatore uvole trovare e se viene trovata nel file emette il risultato.
+- se avessimo un log di un webserver e volessimo sapere quante pagine sono state visitate, basta emettere un numero per ogni pagina nel log e con la reduce raggruppiamo tutti i numeri e otteniamo il punteggio.
+- assumiamo che data una pagina nel grafo del web vogliamo calcolare tutte le pagine che hanno un link verso quella pagina, distribuisco il grafo del web a diverse macchine, ciascuna macchin fa scansione di una pagina e se c'è un link verso la mia pagina, viene emessa una coppia chiave valore dove la chiave è la destinazione dell'url. Nella reduce posso raggruppare tutto.
+
+Se un mapreduce non è abbastanza per risolvere un determinato problema, in quasi tutti i casi, concatenando diversi mapreduce si possono risolvere problemi più complessi. Fattibile, ma difficile da gestire e da mantenere. MapReduce è disegnato per fare solo una computazione.
+
+FlumeJava è un framework e un nuovo modello di programmazione in cui vengono fornite delle API (primitive e delle funzioni costruite sopra queste) per fare computazioni distribuite. Evolve mapreduce. Si occupa anche di ottimizzare questa computazione cercando di capire le possibili scorciatoie senza compromettere la validità del data ed è anche un executor.
+
+FlumeJava non fa nulla dal punto di vista della gestione dati fin quando non viene eseguita la funzione run. Viene inizialmente definito il grafo di computazione (ogni "trasformata" è un nodo del grafo). Ciascuna operazione di liberia può essere mappa su una map reduce. Ad esempio, quindi, la funzione count in realtà fa una map, una gbk e una combine. A questo punto possiamo ottenere un grafo di computazione più granulare. Da qui, Flume può iniziare a mappare il problema in termini di successioni di mapreduce. In realtà, Flume è ancora più furbo e detecta che alcune funzioni possono essere incorporate all'interno della stessa fase di mapreduce.
+
+MillWheel
+Flume e MapReduce sono estremamente efficaci quando bisogna processare un insieme di dati in batch. Se vogliamo aggiornare i risultati, perché i dati sono aggiornati, l'unica maniera per farlo safe è rieseguire lo stesso mapreduce.
+Un team di sviluppo all'interno di google ha sviluppato una soluzione: MillWheel, una specie di mapreduce per il caso continuo. Disegnato per processare grossi stream di dati in input. Il framework di millwheel consente al programmatore di creare computazioni e connetterle ad altre computazioni tramite connessioni chiamate stream. I diversi record che arrivano in ingresso vengono trasmessi come tutple chiave-valore e timestamp. Il processo viene distribuito per chiave. Ciascun nodo può mantere lo stato per confrontare un nuovo input con un input precedente, ad esempio. Inoltre consente di settare dei timer, per effettuare ri-computazioni in maniera asincrona nel futuro. Ciascuna computazione viene distribuite attraverso diverse macchine. Il criterio di distribuzione è molto simile a quello di bigtable: dato l'insieme delle possibili chiavi in input, le chiavi vengono divise in range e ciascuna macchina si prende cura di un range di chiavi. Quando il coordinatore riceve un dato in input, a seconda della chiave, sa quale computazione eseguire. Se la computazione produce dati in output, avviene nuovamente la distribuzione, cercando quale istanza della computazione successive ha in carico il rage a cui appartiene quella chiave, per effettuare la fase successiva della computazione (tramite RPC).
+
+
+
+
+-----------------------------------
+FAbbbBBIO
+
+Tipi di dati gestiti da google:
+TUTTO
+
+
+
+
+
+\end{comment}

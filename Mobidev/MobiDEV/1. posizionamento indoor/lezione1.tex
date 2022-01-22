@@ -1,0 +1,140 @@
+\begin{center}
+    \textbf{--------- Lezione 1 - 1 marzo 2021 ---------}
+\end{center}
+
+\section{Concetti preliminari}
+\subsection{Calcolo della posizione indoor vs outdoor}
+La maggior parte delle app richiede una maggior precisione, l'altezza infatti è fondamentale: sono al primo o al quinto piano di un edificio?
+Negli ambienti outdoor l'altezza non è così fondamentale.
+
+Le tecniche che utilizziamo in outdoor non possono essere utilizzate in indoor:
+\begin{itemize}
+    \item GPS: linea di comunicazione tra la sorgente (satellite) e il dispositivo
+    \item le interferenze possono rendere inutilizzabile il sistema segnale, come il segnale radio che viene disturbato da muri o da altri ostacoli
+\end{itemize}  
+
+L'area di copertura in indoor è ridotta. 
+Nel maggior parte dei casi lo spostamento avviene a piedi ed il vantaggio spostandosi lentamente è che si ha una minore rapidità di spostamento degli utenti, lo svantaggio è che siamo soggetti a rumori come a cambiamenti di direzione improvvisi. 
+
+Attualmente l'indoor positioning è ancor poco comune.
+
+\textit{\textbf{Chi è il soggetto da localizzare?}}
+\\ Possiamo voler monitorare la posizione di persone, robot o oggetti come ad esempio il carrello delle emergenze in un ospedale. 
+\\ Soggetti diversi implicano tecnologie diverse:
+\begin{itemize}
+    \item per le persone abbiamo tecniche di posizionamento che sfruttano i dispositivi mobili degli utenti
+    \item per i robot e gli oggetti possiamo prevedere un hardware apposito
+\end{itemize}
+
+\textit{\textbf{Chi effettua il calcolo della posizione?}} 
+\\ Ci sono due tipi di tecniche: 
+\begin{itemize}
+    \item tecniche attive: il calcolo della posizione viene effettuato dal dispositivo in movimento (le tecniche trattate nel corso)
+    \item tecniche passive: l'hardware distribuito nell'ambiente capisce in che posizione sono gli utenti 
+\end{itemize}
+
+\subsection{Applicazioni principali}
+\begin{itemize}
+    \item navigazione: non è una tecnologia molto utilizzata. Sapere dove muovermi all'interno di un aeroporto sarebbe comodo, come ad esempio "guidami fino al gate 15"
+    \item location based services: vengono utilizzati per l'outdoor, non ancora per l'indoor 
+    \item home automation: es. un sistema che in base alla stanza nel quale mi sposto, accende le luci
+    \item context detection: es. il riconoscimento precoce di malattie degenerative tramite un'analisi del comportamento degli utenti
+    \item social networking: es. friend finder
+    \item emergenze: es. in caso di incendio i vigili del fuoco sanno dove sono le persone da salvare
+\end{itemize}
+
+\subsection{Paradigmi di navigazione}
+\begin{itemize}
+    \item Navigazione allocentrica: il sistema fornisce le indicazioni di navigazione rispetto all'ambiente come ad esempio la vista dall'alto con la mappa. 
+    \item Navigazione egocentrica: il sistema fornisce le indicazioni di navigazione rispetto all'utente, come ad esempio una freccia che indica dove andare
+\end{itemize}
+L'interpretazione da parte dell'utente delle informazioni allocentriche richiede all'utente di conoscere com'è orientato e non sempre questa navigazione è possibile quando c'è ad esempio del fumo o della nebbia. 
+
+\subsection{Caratteristiche dei sistemi di posizionamento indoor}
+Quali caratteristiche deve avere il sistema per adattarsi alle necessità dell'utente?
+\begin{itemize}
+    \item il sistema indoor deve essere preciso nel calcolo della posizione
+    \item area di copertura (stanza, edificio, globale)
+    \item il costo (di installazione, di manutenzione, ecc.)
+    \item infrastruttura (nessuna, trasmettitori sparsi nell'ambiente, ecc.)
+    \item maturità della tecnologia (prototipo, prodotto, ecc.)
+    \item tipo di informazione di posizione che viene prodotto (posizione 2D/3D, orientamento, ecc)
+    \item privacy (il sistema viene a sapere dove si trova l'utente?)
+    \item frequenza di update (quando l'utente fa qualcosa, automatico ogni 4 secondi)
+    \item azione richiesta all’utente (nessuna, inquadrare il marker, ecc.)
+    \item interfaccia (grafica, vocale, ecc.)
+    \item robustezza della misura (nelle giornate affollate, ecc.)
+    \item robustezza della sistema (i beacon si possono rubare, i marcatori si staccano, ecc.)
+    \item scalabilità (non scalabile, scalabile aumentando l’infrastruttura, scalabile diminuendo l’accuratezza, ecc.)
+    \item impatto sull'ambiente (i marcatori visivi rovinano l’aspetto estetico, ecc.)
+\end{itemize}
+
+\section{Tecniche di posizionamento}
+Ci sono 4 tecniche di posizionamento indoor che verranno approfondite:
+\begin{itemize}
+    \item immagini
+    \item segnali radio
+    \item sistemi inerziali
+    \item soluzioni ibride
+\end{itemize}
+
+\section{Tecniche basate su immagini}
+Ci sono diverse tecniche che permettono di calcolare la posizione usando le immagini tra cui i marcatori visivi.
+I marcatori visivi sono oggetti facilmente riconoscibili tramite tecniche di computer vision. Distinguiamo marcatori:
+\begin{itemize}
+    \item espliciti: progettati per essere facilmente riconoscibili come i QR-code
+    \item impliciti: creati per altri scopi, ma facilmente riconoscibili con tecniche di computer vision come i cartelli stradali
+\end{itemize}
+
+I marcatori visivi possono essere installati nell'ambiente. Quando un utente ad esempio inquadra il marcatore, so che l'utente si trova lì vicino. Ciascun marcatore contiene la propria posizione oppure un identificatore che il device sa associare alla posizione. 
+
+\subsection{Pro e contro dei marcatori espliciti}
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{p{.45\textwidth}|p{.45\textwidth}}
+        \textbf{Vantaggi} & \textbf{Svantaggi} \\
+        \hline
+        \begin{itemize}
+            \item tecnologia semplice e stabile 
+            \item i marcatori sono economici
+        \end{itemize} & 
+        \begin{itemize}
+            \item la precisione è legata alla distanza alla quale il device riesce a riconoscere il marcatore
+            \item non permettono di calcolare l'angolo
+            \item è richiesta un'azione esplicita all'utente
+        \end{itemize}
+    \end{tabular}
+\end{table}
+
+\subsection{I marcatori impliciti}
+Se so la dimensione in centimetri del marcatore, dove viene appeso e con che angolo, quando il marcatore viene inquadrato, posso usare tecniche di geometria per capire dove si trova l'utente rispetto al marcatore. 
+
+Però ho un problema: ho il sistema dove ho cartelli facilmente riconoscibili e sviluppo una tecnica che riconosca i cartelli ma ci potrebbero essere due cartelli uguali. 
+Bisogna combinare la tecnica con altre tecniche ad esempio usando i segnali radio. 
+La tecnica funziona da sola nel caso in cui i marcatori impliciti siano tutti diversi. 
+
+\subsubsection{Pro e contro}
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{p{.45\textwidth}|p{.45\textwidth}}
+        \textbf{Vantaggi} & \textbf{Svantaggi} \\
+        \hline
+        Non devo installare altri segnali nell'ambiente (in alcuni ambienti potrebbe essere impossibile, ad esempio nei musei) & se i marcatori non sono univoci la tecnica da sola non permette di calcolare la posizione e deve essere combinata con altre tecniche
+    \end{tabular}
+\end{table}
+
+\subsubsection{Tecniche marker-less}
+Per risolvere i problemi posso usare tecniche marker-less, non vengono scelti marcatori da me programmatore ma il sistema estrae da solo delle informazioni visive che permettono poi all'utente di capire dove si trova.
+Questa tecnica opera a due fasi:
+\begin{itemize}
+    \item setup: viene costruita una mappa 3D dell'ambiente, il sistema identifica diversi punti di riferimento con caratteristiche geometriche peculiari
+    \item calcolo posizione: quando l'utente è nell'ambiente, vengono identificati alcuni punti di riferimento e poi vengono confrontati con quelli ottenuti in fase di setup, per risalire alla posizione
+\end{itemize}
+
+Ho però un problema: durante la fase di setup ho un dispositivo che mentre si muove, deve creare una mappa dell'ambiente e deve sapere dove sono rispetto all'ambiente. 
+
+Durante la fasi di calcolo della posizione, dal device mobile si cerca di trovare gli stessi punti di riferimento identificati in fase di setup e di stimare la posizione della camera rispetto ad essi. 
+
+Ho un problema: due zone possono avere le stesse caratteristiche, ad esempio possono esserci due stanze che presentano le stesse feature su piani diversi di un edificio.
+
+

@@ -1,0 +1,294 @@
+Il pervasive computing, anche detto ubiquitous computing, rappresenta un'area dell'informatica che è l'intersezione di diverse altre aree fondamentali tra cui:
+\begin{itemize}
+    \item reti
+    \item sistemi
+    \item algoritmi
+    \item architetture
+    \item intelligenza artificiale
+\end{itemize}
+\phantom \\
+
+Gli elementi che caratterizzano il pervasive computing sono smart objects che possono diventare nodi di un sistema distribuito.
+\\
+\\
+\say{The most profound technologies are those that disappear. They weave themselves into the fabric of everyday life until they are indistinguishable from it.} - Mark Weiser.\\\\
+Con la parola pervasive si intende la volontà di avere un ambiente che, tramite una modifica attuata dal cumputing, riesca a rispondere alle nostre esigenze. I nodi del sistema che permettono di fare un sensing dell'ambiente e di cambiarlo, sono dispositivi harware e software distribuiti.
+
+\newpage
+\section{Sistema distribuito pervasivo}
+Un sistema distribuito pervasivo è un sistema distribuito con altre caratterisiche:
+
+\begin{itemize}
+    \item i nodi del sistema sono nodi non convenzionali ovvero sono dei dispositivi con altre funzionalità principali (es. elettrodomestici con capacità di calcolo e comunicazione).
+    \item il sistema è adattivo:  la logica del sistema considera il contesto attraverso un ascolto dei parametri dell'ambiente e adatta il sistema per fornire un servizio migliore.
+\end{itemize}
+
+\phantom \\
+
+Questi sistemi sono dotati di alta volatilità poiché:
+\begin{itemize}
+    \item Potrebbero essere soggetti a fallimenti di dispositivi e di comunicazione molto più che nei tradizionali sistemi distribuiti poiché i nodi potrebbero essere veramente tanti (sensori) e i sistemi di comunicazione diversi.
+    \item In alcune situazioni la banda per la comunicazione può essere limitata
+    \item Aumentando il numero dei dispositivi, aumenta la probabilità che questi si associno o si dissocino dal sistema distribuito (sistema più dinamico che richiede meccanismi di associazione/disassociazione particolari).
+\end{itemize}
+
+\section{Mobile computing}
+Il pervasive include anche la mobilità attraverso dispositivi integrati in spazi e ambienti differenti (ad esempio l'abitazione, l'ufficio, la città) e spesso questi dispositivi risultano invisibili (non hanno un'interfaccia diretta). Occorre dunque gestire gli smart spaces, quindi stabilire quale tipo di reti instaurare tra questi oggetti, come farli comunicare e in che modo gestirli. Questi sistemi crescono molto velocemente ed è fondamentale, al fine di gestirne la scalabilità, cercare di formare una rete tale per cui nodi vicini comunichino in maniera diretta al fine di ottimizzare lo scambio di messaggi all'interno dell'intera rete.
+\\
+\\
+\textit{Uneven conditioning}: occorre convivere in un ambiente in cui cambia la connettività, in cui alcune cose sono più smart di altre. Occorre progettare un sistema in grado di funzionare anche quando è sconnesso o quando non vi sono condizioni ottimali, che si adatti anche in reti di sensori più primitivi.
+\newpage
+Anche nel mobile computing vi sono risorse limitate e problematiche da gestire:
+\begin{itemize}
+    \item tipi di interfacce diverse
+    \item varianza nella connettività (ip che cambia)
+    \item possibilità di lavorare in modo sconnesso (con memoria locale e meccanismi di sincronizzazione non appena la connessione è disponibile) e mobile data management
+\end{itemize}
+\phantom \\
+
+Principali argomenti di ricerca:
+\begin{itemize}
+    \item Rete
+    \item Mobile information access
+    \item Mobile data management (privacy e sicurezza, mobile cloud services, LBS)
+    \item Positioning (indoor, outdoor, prossimità, tracking)
+    \item Software (App e mobile services design, develompent and testing, scalabilità)
+\end{itemize}
+
+\section{Pervasive Computing}
+Il pervasive computing spazia tra nodi mobili, computer embedded, attuatori e sensori connessi ad internet che ascoltano ed influenzano il mondo fisico.\\
+\\
+Esempi di pervasive systems:
+\begin{itemize}
+    \item smart environment systems
+    \begin{itemize}
+        \item Smart home services
+        \item smart energy management
+        \item smart transportation (usando crowdsensing attraverso smartphone e sensori)
+    \end{itemize}
+    \item e-Health systems per 
+    \begin{itemize}
+        \item tele-healthcare
+        \item independent living and ageing well
+        \item accessibility
+    \end{itemize}
+\end{itemize}
+
+
+\section{IoT}
+Nell'IoT (Internet of things) sono inclusi quei dispositivi connessi ad internet che sono pensati per fare sensing o interventi. Nell'IoT ci sono moltissimi dispositivi che non hanno un indirizzo IP, partecipano a delle sotto-reti e utilizzano Internet attraverso un gateway. Nonostante il pervasive computing comprenda anche l'internet of things, non tutto ciò che è IoT è da considerare pervasive computing. E' bene sapere che, quando introduciamo nodi in un sistema distribuito, necessitiamo di un coordinamento per fare comunicare i vari dispositivi distribuiti nel modo corretto. Nella maggior parte dei casi questo coordinamento viene gestito in maniera centralizzata.
+
+\subsection{Smart}
+Molti produttori di tecnologia spacciano loro prodotti di fascia medio-alta come smart. Ma cosa è veramente "smart"?\\
+Di fatto un dispositivo per essere considerato smart non basta che sia connesso ad internet e che sia comandabile da remoto. Un dispositivo smart deve infatti rispettare delle caratteristiche per essere definito tale:
+\begin{itemize}
+    \item Connesso ad internet: ovviamente la prima caratteristica è quella più comune, ovvero necessita di una scheda di rete che gli consenta di connettersi in rete così da poter essere acceduto dall'esterno, invocare servizi, etc..
+    \item Capacità di calcolo: il dispositivo smart deve essere in grado di svolgere pre-computazione di dati o utilizzare protocolli per inviare e ricevere dati dal cloud
+    \item Servizi context-aware personalizzati: la vera caratteristica principale di un dispositivo smart è quella di riuscire a capire il contesto in cui si trova e offrire servizi personalizzati in base alla situazione. Ad esempio una macchinetta del caffè che capisce dal tono della tua voce che tipo di caffè vuoi (macchiato, espresso..)
+\end{itemize}
+
+\subsubsection{"Smart" appliances}
+Il campo smart si sta sempre più diffondendo in ogni settore, cercando di rendere "smart" sempre più oggetti e contesti. Ad esempio:\\ 
+
+Smart vehicles, le quali integrano diverse compinenti:
+\begin{itemize}
+    \item centinaia di sensori diversi
+    \item telecamere
+    \item 2+ leader che ricostruiscono in 3d l'ambiente
+    \item 4+ radar
+    \item gps
+    \item attuatori che in base ai dati rilevati e ad un algoritmo decisionale, modificano il comportamento dell'auto in base ai dati rilevati. In questo campo è sempre più necessario l'introduzione del 5g, così da riuscire in tempo reale a far comunicare l'auto con gli altri veicoli e con l'ambiente circostante. Tutti questi dati contribuiscono ad un sistema distribuito.
+\end{itemize}
+\phantom \\
+
+Altro esempio è quello del sensor network in cui rientrano, ad esempio, tute piene di sensori per la lettura dei parametri vitali. 
+
+\section{Applicazione ed ambiti del pervasive computing}
+Abbiamo visto dunque come il pervasive computing sia un incrocio di diverse aree dell'informatica. Questo ambito è tutt'ora in via di sviluppo e ancora da esplorare a fondo. Ad esempio, alcune nuove questioni ancora da esplorare sono:
+
+\begin{itemize}
+    \item come usare smart spaces in modo utile ed efficiente e dunque adattare il sistema in base al contesto
+    \item cercare di rendere i dispositivi sempre più invisibili e integrati all'interno dell'ecosistema
+    \item dotare ogni nodo di un indirizzo e capacità specifiche e rendere l'integrazione e la comunicazione tra i vari dispositivi il più trasparente possibile. Ad esempio, entrando in una camera di hotel, il proprio telefono che conosce le tue abitudini si associa ai vari componenti smart della stanza e li dirige per far si che la tua esperienza sia il più personalizzata possibile
+\end{itemize}
+\phantom \\
+
+Ecco alcuni ambiti del pervasive computing:
+\begin{itemize}
+    \item modellare le attività umane di alto livello
+    \item crowd sensing
+    \item energia
+    \item pervasive health, tramite dispositivi indosabili o nell'ambiente e l'interazione dei due
+    \item trasporti e ottimizzazione della mobilità
+    \item edge computing, cercare di spostare il calcolo sui dispositivi vicini, soprattutto quando è oneroso
+    \item security e privacy, sono molto facili da attaccare dal punto di vista del software e dell'harware su cui girano. Privacy: le attività svolte ad esempio in casa sono private e se sono condivise in cloud, qualunque attacco al cloud va ad impattare sui dati.
+\end{itemize}
+
+
+
+
+
+
+
+\begin{comment}
+kikko
+\section{Introduzione al pervasive computing}
+Il pervasive computing (anche detto ubiquitous computing)
+raprresenta una visione (area di intersezione tra aree fondamentali dell'informatica come reti, algoritmi, architetture e AI). Gli elementi del pervasive sono smart objects che rappresentano i nodi di un sd. 
+\textit{Le più profonde tecnologie sono quelle che spariscono. Si nascondono negli elementi di ogni giorno fin tanto che non si riesce a distinguerle - Mark Weiser}
+Nel pervasive computing ci serve avere un ambiente che risponda alle nostre esigenze: capire e modificare l'ambiente (capting and computing).
+
+Un SDP è un SD con altre caratteristiche
+\begin{itemize}
+    \item nodi non convenzionali (non sono unità di calcolo, non sono computer), nei quali sono stati aggiunte capacità di calcolo e comunicazione.
+    \item adattività: la logica del sistema considera il contesto e adatta il comportamento del sistema per ottimizzare l'obiettivo finale
+\end{itemize}
+
+Questi sistemi sono dotati di alta volatibilità poichè:
+\begin{itemize}
+    \item ancora di più che negli SD tradizionali potrebbero essere soggetti a fallimenti di dispositivi e di comunicazione
+    \item può cambiare la caratteristica della comunicazione (la larghezza di banda può essere limitata ad esempio)
+    \item aumentando di numero i dispositivi possono avere difficoltà a creare o distruggere associazioni tra le componenti sw dei dispositivi
+\end{itemize}
+
+SCHEMA DA SD a SDP
+
+\subsection{Mobile Computing}
+Principali problemi:
+\begin{itemize}
+    \item risorse limitate
+    \item tipi di interfacce diverse
+    \item varianza nella connettività
+    \item locazione variabile
+\end{itemize}
+
+Principali argomenti di ricerca:
+\begin{itemize}
+    \item Rete
+    \item Mobile information access
+    \item Mobile data management (privacy e sicurezza, mobile cloud services, LBS)
+    \item Positioning (indoor, outdoor, prossimità, tracking)
+    \item Software (App e mobile services design, develompent and testing, scalabilità)
+\end{itemize}
+
+\subsection{Pervasive Computing}
+Da nodi mobili a computer embedded e attuatori e sensori connessi ad Internet, che ascoltano e influenzano il mondo fisico. 
+
+Esempi di pervasive systems:
+\begin{itemize}
+    \item smart environment systems
+    \begin{itemize}
+        \item Smart home services
+        \item smart energy management
+        \item smart transportation (usando crowdsensing attraverso smartphone e sensori)
+    \end{itemize}
+    \item e-Health systems per 
+    \begin{itemize}
+        \item tele-healthcare
+        \item independent living and ageing well
+        \item accessibility
+    \end{itemize}
+\end{itemize}
+
+\subsection{IoT}
+Dispositivi che sono pensati per fare sensing o interventi, connessi a internet.
+Si dice IoT anche quando il dispositivo non ha un IP Address.
+
+Non tutto ciò che è IoT è pervasive.
+
+Molti produttori di tecnologia spacciano loro prodotti di fascia medio-alta come smart. Ma cosa è veramente "smart"?
+\begin{itemize}
+    \item Connessa a internet (accesso remoto, invocazione di servizi, cooperazione ...)
+    \item Esegue algoritmi (localmente o remotamente) per analizzare dati e comprendere il contesto attraverso l'integrazione con AI
+    \item Offre servizi context-aware personalizzati (deve capire il contesto e offrire servizi personalizzati in base a quello)
+\end{itemize}
+
+\subsection{Reti di sensori}
+Sono importante componenti dei SDP. I sensori possono essere parte di oggetti smart (smartphone, macchina).
+Domande riguardanti le reti di sensori:
+- 
+-
+-
+
+Nuove questioni da esplorare nell'ambito del pervasive computing:
+\begin{itemize}
+    \item smart spaces devono essere usati efficacemente (adattività, context-awareness, anticipazione dei bisogni)
+    \item invisibilità: l'interazione con gli utenti deve essere minimizzata
+    \item le risorse in un ambiente pervasivo dovrebbe essere "scopribile" e bisogna abilitare associazioni e collaborazioni dinamiche.
+\end{itemize}
+Contesti di ricerca nel pervasive computing:
+\begin{itemize}
+    \item Modellazione e Riconoscimento del contesto e delle attività
+    \item Crowd Sensing
+    \item Energy Analytics
+    \item Pervasive Health
+    \item Pervasive Transportation
+    \item Edge Computing
+    \item Security and Privacy
+\end{itemize}
+
+
+___----____----____----___----____-_____--___
+
+Edoardo Rigolini
+
+Il pervasive computing, anche chiamato ubiquitous computing, rappresenta un'area dell'informatica che è l'intersezione di diverse altre aree fondamentali (reti, sistemi, algoritmi, architetture e intelligenza artificiale). Elementi del pervasive sono smart objects che possono diventare nodi di un sistema distribuito. 
+Un grande risultato sarebbe far scomparire il computing, in modo che sia integrato all'interno dell'ambiente - osservazione di Mark Weiser.
+Nel pervasive, vogliamo avere un ambiente che risponda alle nostre esigenze. Si vuole quindi capire e modificare l'ambiente attraverso il computing. Questi nodi del sistema che permettono di fare un sensing dell'ambiente e di cambiarlo, sono dispositivi hw e sw distribuiti. 
+Distributive pervesavi system: sistema distribuito con nodi non convenzionali (dispositivi con altre funzionalità principali, ad es. elettrodomestici, con capacità di calcolo e comunicazione).
+Questo non è sufficiente, oltre ad avere caratteristica di sistema distribuito (fornire una funzionalità senza far vedere i componenti che partecipano a realizzarla), c'è anche adattività: dobbiamo capire il contesto corrente attraverso un ascolto dei parametri dell'ambiente e adattare il sistema per fornire un servizio migliore.
+Questi sistemi sono, più dei sistemi distribuiti tradizionali, soggetti a failure, poiché i nodi potrebbero essere veramente tanti (sensori) e i sistemi di comunicazione sono diversi. Non tutti i dispositivi hanno un proprio IP.
+In alcune situazioni la banda per la comunicazione può essere limitata.
+Aumentando il numero dei dispotivi, aumenta la probabilità che questi si associno o si dissocino dal sistema distribuito (sistema più dinamico che richiede meccanismi di associazione/disassociazione particolari).
+
+Il pervasive include anche la mobilità, ma questi dispositivi sono integrati in spazi (ad esempio l'abitazione, l'ufficio, la città) e spesso sono invisibili (non hanno un'interfaccia diretta). Occorre gestire gli smart spaces, quindi stabilire quale tipo di reti instaurare tra questi oggetti, ecc. Questi sistemi crescono molto velocemente ed è fondamentale, al fine di gestire la scalabilità, considerare quelli che sono vicini tra di loro e ottimizzare la comunicazione tra questi. (?)
+Uneven conditioning: occorre convivere in un ambiente in cui cambia la connettività, in cui alcune cose sono più smart di altre. Occorre progettare un sistema in grado di funzionare anche quando è sconnesso o quando non vi sono condizioni ottimali, che si adatti anche in reti di sensori più primitivi (?).
+
+Anche nel mobile computing vi sono risorse limitate e problematiche da gestire: diversi tipi di interfaccia, ip che cambia, possibilità di lavorare in modo sconesso (con memoria locale e meccanismi di sincronizzazione non appena la connessione è disponibile) e mobile data management. Nel mobile computing vi sono anche tecniche di positioning.
+
+
+Nell'IoT ci sono moltissimi dispositivi che non hanno un indirizzo IP. Partecipano a delle sotto-reti e utilizzano Internet attraverso un gateway. 
+
+Non tutto ciò che è IoT è pervasive computing. Quando introduciamo nodi in un sistema distribuito, necessitiamo di un coordinamento. Nella maggior parte dei casi c'è una gestione centralizzata. (?)
+
+Smart:
+- Connesso ad internet, consentendo i accedere dall'esterno, invocare servizi, etc.
+- Deve avere capacità di calcolo. Pre-computazione di dati o mandarli in cloud e ricevere dati
+- Offre servizi personalizzati e basati sul contesto
+
+
+
+
+Smart vehicles:
+- centinaia di sensori diversi
+- telecamere
+- 2 leader che ricostruiscono in 3d l'ambiente
+- 4 radar
+- gps
+- ...
+- attuatori, che in base ai dati rilevati e all'algoritmo che decide, avendo processati questi dati, cosa fare, modificando il comportamento dell'auto.
+Con il 5g e reti ad hoc possono comunicare con altri veicoli e dispositivi lungo la strada. Tutti questi dati contribuiscono ad un sistema distribuito.
+
+
+
+
+Sensor network:
+Esempio la tuta nella slide precedente: bus e synch che riceve i dati e li comunica in rete. I sensori di per sé non sono in grado di comunicare, necessitano ... (?)
+
+Pervasive computing: incrocio di varie aree dell'informatica. Nuove questioni da esplorare:
+- come usare smart spaces in modo utile ed efficiente. Capire il contesto e in base a questo adattare il sistema.
+- invisibilità di questi oggetti, l'interazione dev'essere minimizzata
+- ciascun nodo avrà un indirizzo, delle capacità, etc. Quando si entra in un nuovo ambiente, devono essere scoperti i dispositivi presenti e devono essere associati ai propri.
+
+Ambiti del pervasive computing
+- modellare le attività umane di alto livello
+- crowd sensing
+- energia
+- pervasive health, tramite dispositivi indosabili o nell'ambiente e l'interazione dei due
+- transportation, ottimizzare la mobilità
+- edge computing, cercare di fare calcolo, soprattutto quando molto oneroso, ... (?)
+- security e privacy, sono molto facili da attaccare dal punto di vista del sw e hw su cui girano. Privacy: le attività svolte ad esempio in casa sono private e se sono condivise in cloud, qualunque attacco al cloud va ad impattare sui dati.
+
+
+
+\end{comment}

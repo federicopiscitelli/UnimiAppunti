@@ -1,0 +1,42 @@
+\begin{center}
+    \textbf{--------- Lezione 5 - 9 ottobre 2020 ---------}
+\end{center}
+
+\section{Gestione dei dati di posizione}
+Quando il device mobile ha calcolato la posizione, la può usare localmente oppure la può inviare ad un server.
+
+In entrambi i casi si possono adottare tecniche per gestire il dato di posizione. 
+Le più comuni sono:
+\begin{itemize}
+    \item Geocoding e reverse-geocoding: entrambi vengono svolti dal server, geocoding converte l'indirizzo geografico in coordinate spaziali, reverse geocoding è l'operazione inversa
+    \item Geofencing: viene svolta in locale dal device, si definisce un'area e il device tiene monitorata la posizione dell'utente quando si entra e si esce dall'area (ad esempio attraverso una notifica)
+    \item calcolo delle distanze: esiste una formula che calcola la distanza dalla terra (calcolo in linea d'aria)
+    \item calcolo delle distanze su rete stradale: non abbiamo un calcolo in linea d'aria ma si modella la rete stradale come un grafo dove:
+    \begin{itemize}
+        \item i nodi sono le intersezioni
+        \item gli archi sono i segmenti di strada
+    \end{itemize}
+    Ogni arco è etichettato con la distanza geografica tra i due nodi oppure con il tempo necessario per andare da un nodo all'altro calcolato come:
+    \begin{itemize}
+        \item tempo: distanza / limite di velocità (non molto affidabile, dipende dal traffico e altri fattori) 
+        \item tempo di percorrenza medio di altri utenti
+    \end{itemize}
+\end{itemize}
+
+Spesso i dati vengono memorizzati lato server dove è necessario definire delle tecniche di trattamento apposite.
+\\ Ad esempio molti DBMS utilizzano dati spazio temporali ed offrono delle estensioni a DB classici per gestirli. 
+
+Ci sono tre query comunemente adottate nei servizi e nel DBMS con 
+estensioni spaziali:
+\begin{itemize}
+    \item Range query: si dà in input una zona geografica (che può essere un rettangolo oppure un cerchio) e la query ritorna tutti i punti che appartengono a quella zona indicata. Es: dammi tutte le automobili che sono nel posteggio
+    \item Nearest Neighbors (NN): ho un insieme di punti e do in input uno di questi punti. La NN mi ritorna l'oggetto più vicino ad un punto o ad un altro oggetto. Es: dammi le tre stazioni di servizio più vicine a me
+    \item Reverse-NN: dato un insieme di punti P e un punto q di P,  ritorna tutti i punti di P che hanno q come punto più vicino. Es: dammi tutti gli utenti che hanno me come loro utente più vicino o dammi tutte le case che hanno quel supermercato come il più vicino
+\end{itemize}
+
+I DB implementano delle strutture dati chiamati indici che permettono di rendere le operazioni più veloci. 
+\\ Per esempio una range query su un’area “piccola”, rispetto alla distribuzione dei punti, ha una complessità logaritmica nel numero dei punti.
+
+
+
+

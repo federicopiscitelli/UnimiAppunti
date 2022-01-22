@@ -1,0 +1,146 @@
+\begin{center}
+    \textbf{--------- Lezione 13 - 26 aprile 2021 ---------}
+\end{center}
+
+\section{Funzioni e closures}
+Caratteristiche delle funzioni: 
+\begin{itemize}
+    \item possono avere più di un valore di ritorno (come le tuple)
+    \item i parametri possono avere dei valori di default
+    \item le funzioni sono un tipo di dato (un parametro di una funzione ad esempio può essere una funzione)
+
+\end{itemize}
+\begin{Swift}
+    func greet(person:String) -> String{ //definizione 
+        let greeting = "Hello, " + person + "!"
+        return greeting
+    }
+    
+    print(greet(person: "Sergio")) //richiamo la funzione
+\end{Swift}
+
+\subsection{I parametri}
+In Java un parametro è caratterizzato dal nome e dal tipo.
+
+In Swift, invece, ogni parametro ha 3 caratteristiche:
+\begin{itemize}
+    \item un argument label: specifica l'etichetta da usare quando si richiama la funzione
+    \item il nome del parametro: nome della variabile da usare nell'implementazione della funzione
+    \item il tipo del parametro
+\end{itemize} 
+
+Se non indichiamo la label abbiamo il nome della variabile (nella funzione) preceduto da "\_".
+
+Le label hanno un valore sintattico: in Java non possiamo avere due funzioni che hanno la stessa signature (nome del metodo, l'elenco di tipi del metodo ed il valore di ritorno), in Swift invece la label fa parte della signature, quindi possiamo avere due metodi uguali con una label diversa.
+
+I parametri possono avere un valore di default (opzionali) e per convenzione vengono messi dopo quelli necessari. 
+
+Quando all'interno di una funzione voglio cambiare il valore di un parametro, devo andare a specificare la parola riservata \textbf{inout} e bisogna passare i parametri (quando si richiama la funzione) per riferimento. 
+
+Le funzioni sono un tipo di dato, definito dal tipo dei parametri e del valore di ritorno. 
+La funzione sum ad esempio associa un interno ad una coppia di interi. 
+\begin{Swift}
+    func sum(_ a: Int, _ b: Int) -> Int{
+        return a + b;
+    }
+    
+    func dif(_ a: Int, _ b: Int) -> Int {
+        return a-b;
+    }
+    
+    func f(theFunction: (Int, Int)->Int, _ a: 
+    Int, _ b: Int) -> Int {
+        return theFunction(a, b);
+    }
+    
+    let a=5, b=3
+    var operation = sum
+    print(f(theFunction: operation, a, b)); //8
+    operation = dif
+    print(f(theFunction: operation, a, b)); //2
+\end{Swift}
+
+È possibile assegnare un nome nuovo ad un tipo come:
+\begin{Swift}
+    typealias Pippo = Int //posso usare Pippo al posto di Int
+\end{Swift}
+È molto utile quando si usano le funzioni come tipi.
+
+\subsection{Ordinamento di un Array}
+Per ordinare un Array, è necessario passare come parametro il criterio di ordinamento: 
+\begin{Swift}
+    func forward(first:String, second:String) -> Bool {
+        return first<second
+    }
+    func backward(first:String, second:String) -> Bool {
+        return first>second
+    }
+    
+    let names = ["Carlo", "Daniele", "Ugo", "Bruno", "Sergio",
+                "Mattia"]
+    print(names.sorted(by: forward)) 
+    //["Bruno", "Carlo", "Daniele", "Mattia", "Sergio", "Ugo"]
+    print(names.sorted(by: backward))
+    //["Ugo", "Sergio", "Mattia", "Daniele", "Carlo", "Bruno"]
+\end{Swift}
+
+È anche possibile definire una funzione dentro ad altre funzioni. La visibilità delle funzioni definite cambia, infatti non è possibile accedere ad una funzione definita all'interno di un'altra.
+
+
+\subsection{Closures}
+Sono simili ai blocchi in C e Objective-C e alle lamdba expression di Java. 
+Servono per risolvere in modo più compatto alcuni problemi tipici di questi linguaggi come la gestione degli eventi.
+Sono alla base della sintassi di SwiftUI.
+Una closure concettualmente corrisponde a definire una funzione nel momento stesso in cui mi serve.
+
+Indichiamo una closure tra parentesi graffe, indichiamo i parametri ed il valore di ritorno, poi usiamo la parola riservata \textbf{in} e indichiamo il procedimento
+\begin{Swift}
+    let names = ["Carlo", "Daniele", "Ugo", "Bruno", "Sergio",
+    "Mattia"]
+    print(names.sorted(by:{(first: String, second: String) -> 
+                            Bool in
+        return first<second}))
+    //["Bruno", "Carlo", "Daniele", "Mattia", "Sergio", "Ugo"]
+\end{Swift}
+
+Ci sono diverse tecniche per ridurre il codice attraverso le closures:
+\begin{itemize}
+    \item type inference: quando definiamo una funzione da sola, dobbiamo definire tipi e parametri, se invece una closure è passata come argomento ad una funzione, il compilatore sa già quali tipi aspettarsi, dunque possiamo evitare di indicarli. 
+    \begin{Swift}
+    print(names.sorted(by:{first, second in
+        return first<second
+    }))
+\end{Swift}
+    \item implicit return: se una closure ha una sola istruzione, si può omettere il return
+    \begin{Swift} 
+        print(names.sorted(by:{first, second in 
+                                first<second}))
+    \end{Swift}
+    \item shorthand argument names: pssiamo omettere di indicare i nomi dei paraemtri, usiamo la notazione \$0 per il primo, \$1 per il secondo parametro, ecc.
+    In questo caso possiamo anche evitare la parola riservata "in"
+    \begin{Swift}
+        print(names.sorted(by:{$0<$1}))
+    \end{Swift}
+    \item operation methods: se l'unica operazione da compiere è applicare un operatore ai due parametri, possiamo omettere i parametri stessi e indicare solo l'operatore
+    In questo caso non indichiamo neanche le parentesi graffe
+    \begin{Swift}
+        print(names.sorted(by:<))
+    \end{Swift}
+    \item trailing closure: se la closure è l'ultimo parametro di una funzione, possiamo "spostare" la closure al di fuori dalla funzione. 
+    \begin{Swift}
+        print(names.sorted{$0<$1})
+    \end{Swift}
+\end{itemize}
+
+Le closure in Swift:
+\begin{itemize}
+    \item permettono di essere più compatti
+    \item semplificano la scrittura per i programmatori esperti
+    \item complicano la lettura del codice per i programmatore alle prime armi
+    \item introducono tante eccezioni sintattiche
+\end{itemize} 
+
+Le closures (anche le funzioni innestate) possono usare riferimenti a variabili e costanti che sono definite nel contesto dove la closure è definita. 
+Quello che non è scontato è che queste variabili e costanti rimangono valide anche quando il contesto esterno smette di esistere
+
+

@@ -1,0 +1,247 @@
+\begin{center}
+    \textbf{--------- Lezione 12 - 22 aprile 2021 ---------}
+\end{center}
+
+\section{Swift}
+Swift è un linguaggio di programmazione realizzato da Apple.
+È un linguaggio moderno, recente anche rispetto ad linguaggi di programmazione come C, Java C\#, Dart.
+
+Gli obiettivi di chi crea un nuovo linguaggio di programmazione sono:
+\begin{itemize}
+    \item evitare/ridurre gli errori più comuni del programmatore
+    \item aumentare la compattezza del codice
+    \item migliorare la leggibilità del codice
+    \item migliorare le prestazioni
+\end{itemize}
+
+Le caratteristiche principali di Swift sono:
+\begin{itemize}
+    \item multi piattaforma (iOS, watchOS, macOS, tvOS, ecc.)
+    \item compilato
+    \item supporta due paradigmi di programmazione: 
+    \begin{itemize}
+        \item Object Oriented
+        \item Funzionale
+    \end{itemize}
+    \item si possono creare applicazioni utilizzando combinazioni di Swift, Objective-C, C e C++
+\end{itemize}
+
+\section{Programmazione procedurale in Swift}
+Parole riservate:
+\begin{itemize}
+    \item \textbf{var} definisce una variabile
+    \item \textbf{let} definisce una costante
+\end{itemize}
+L'assegnamento viene fatto con "=", mentre il punto e virgola al termine di ogni istruzione è opzionale ed è preferibile ometterlo, per questioni di stile.
+
+Swift è un linguaggio di programmazione fortemente tipizzato. 
+Si può evitare di specificare il tipo di una variabile nel momento in cui essa viene specificata ed il tipo viene inferito in automatico, ma non può essere cambiato a runtime (come invece succede in JavaScript).
+\begin{Swift}
+    var a = 5 //this is Int
+    var b:Int = 3 //this is explicitly an Int
+    var c = a+b //this is Int
+    var d = "hello!" //this is a String
+    c = d; //this gives a compile-time error
+\end{Swift}
+
+Come avviene in altri linguaggi si può effettuare la conversione di tipi attraverso determinate funzioni.
+Ad esempio per convertire un intero in stringa ci sono due modi:
+\begin{Swift}
+    var studentNumber = 50
+    let label = "Ci sono " + String(studentNumber) + " studenti"
+    //prima conversione
+    let label2 = "Ci sono \(studentNumber) studenti"
+    //seconda conversione
+\end{Swift}
+
+\subsection{Tuple}
+Una variabile può essere associata ad una tupla di valori, es:
+\begin{Swift}
+    let httpError = (404, "Not Found") //tupla di valori
+    //in questo caso error e' di tipo (Int, String)
+\end{Swift}
+Per poter leggere i valori di una tupla si può operare nel seguente modo:
+\begin{Swift}
+    print(httpError) //prints "(404, "Not Found")"
+    //modo 1.
+    let (statusCode, statusMessage) = httpError
+    print(statusCode) //prints 404
+    print(statusMessage) //prints "Not Found"
+    //modo 2.
+    let (statusCodeAgain,_) = httpError; /*just read the 
+    error number, not the type
+    note: in the line above I have used the "_" symbol 
+    meaning "I don't care about the second value"*/
+    print(statusCodeAgain) //prints 404
+    //modo 3.
+    let statusCodeAgainAgain = httpError.0
+    print(statusCodeAgainAgain) //prints 404
+    let statusMessageAgain = httpError.1
+    print(statusMessageAgain) //prints "Not Found"
+\end{Swift} 
+
+La differenza tra tupla e classe è il fatto che una tupla ha solo lo stato, mentre una classe ha sia lo stato che il comportamento. 
+Le tuple si usano per insieme di dati da usare localmente nel codice, ad esempio valori di ritorno delle funzioni. In altri casi si usano le classi o le strutture.
+
+\subsection{Valori opzionali}
+Di default una variabile non può assumere un valore nullo.
+Possiamo specificare una variabile come \textbf{optional} per indicare che può assumere il valore nullo:
+\begin{Swift}
+    var i:Int? = nil 
+\end{Swift}
+Le variabili opzionali sono di un tipo diverso rispetto alle controparti non-opzionali, ad esempio Int? è diverso da Int. 
+Se una funzione prende in input Int, non posso passarle Int?, però vale il contrario. 
+
+Ho una serie di restrizioni quando ho una variabile opzionale:
+\begin{itemize}
+    \item non posso usarla nelle espressioni (non posso fare a+b se una delle due variabili è opzionale)
+    \item non posso accedere ai metodi o accedere alle proprietà
+\end{itemize}
+Esistono vari metodi per estrarre ("unwrap") il valore non-opzionale da una variabile opzionale o comunque per gestire i tipi opzionali. 
+In Java se abbiamo un attributo a di una classe che è null e proviamo a leggerlo, viene dato un NullPointerException.
+
+Ci sono diversi metodi per fare unwrapping:
+\begin{itemize}
+    \item forced unwrapping: mettendo un ! dopo una tipo opzionale, si va a leggere quel tipo come se non fosse opzionale. Se si usa questa sintassi su una variabile che è nil, viene generata un'eccezione a runtime, quindi bisogna sempre controllare prima che non sia nil.
+    \begin{Swift}
+        var a = 1 //non-optional
+        var b = Int("123") //optional
+        var c:Int 
+        c = a+b /*this is a is a compile-time error b cannot 
+        be used in an expression because it could be nil*/
+        //solution:
+        if b != nil {
+         //we use "!" to unwrap the value
+         c = a+b!
+        }
+        /*force unwrapping of a nil variable generates 
+        a runtime exception*/
+    \end{Swift}
+    \item optional binding: si usa un costrutto sintattico comunemente detto "if let". 
+    \begin{Swift}
+        var possibleNumber = "123"
+        var numberOptional = Int(possibleNumber)
+        /*next line: check if numberOptional is nil, 
+        if not, assign it to numberNonOptional and run 
+        the if condition. Otherwise run the else 
+        condition.*/
+        if let numberNonOptional = numberOptional {
+         print(numberNonOptional) //prints 123
+        } else {
+         print("cannot convert")
+        } 
+    \end{Swift}
+    La condizione dell'if è verificata se la variabile che vogliamo controllare non è nil ed in quel caso all'interno del costrutto if abbiamo un riferimento ad un'altra variabile, dello stesso tipo ma non opzionale
+    \item implicitly unwrapped optionals:
+    \begin{Swift}
+        var a: String!
+        var b: String = ""
+        b = a /*generates a runtime error: I am assigning a 
+        nil value to a non-optional variable*/
+        a = "ciao"
+        /*next line: I can use b as if it is not 
+        optional (note, I am not using the !)*/
+        b=a;
+    \end{Swift}
+    A volte è possibile avere una variabile optional che ha sempre un valore. Se definisco una variabile con "!" questa è optional, ma la posso usare come se non lo fosse
+    \item optional chaining: con una variabile opzionale non è possibile accedere né alle proprietà né richiamare i metodi, ma è possibile richiamare metodi e proprietà con una sintassi particolare, attraverso ?, in modo tale che, se la variabile è nil, viene restituito nil, senza generare eccezioni. I valori ritornati sono sempre opzionali
+    \begin{Swift}
+        var user: Person?
+        var n = "" //an empty non-optional string
+        n=user.name /*compile time error: cannot use a 
+        property for optional variable user*/
+        n=user!.name //run-time exception if user is nil
+        n=user?.name /*compile time error: name is a 
+        non-optional property, but when used with 
+        optional chaining can return nil, so it cannot 
+        be assigned to non-optional variable n*/
+        var m: String?
+        m = user?.name
+    \end{Swift}
+    \item nil-coalescing operator: l'operatore ?? viene utilizzato per rendere più breve un'operazione comune: data una variabile opzionale a, restituire il valore di a se a non nil, altrimenti un valore b
+    \begin{Swift}
+        let defaultColorName = "red"
+        var userDefinedColorName: String? // defaults to nil
+        var colorNameToUse = userDefinedColorName ??
+                             defaultColorName
+        /*meaning: if userDefinedColorName is not nil (which 
+        is not the case in this example), then colorNameToUse 
+        is userDefinedColorName. Otherwise colorNameToUse is
+        defaultColorName*/
+    \end{Swift}
+\end{itemize}
+
+La gestione delle variabili opzionali comporta una sintassi più complicata e la necessità di passare da variabili opzionali a non opzionali.
+\\ La sintassi, però, è utile per spostare un'eccezione, a livello di errore sintattico identificato, a tempo di compilazione, a differenza di Java che con un NullPointerException ci dà errore a run-time.
+
+Alla fine il risultato è una riduzione degli errori di gestione delle variabili con valore nullo. 
+
+\subsection{Operatori}
+Sono molto simili agli operatori C:
+\begin{itemize}
+    \item unari (-a, !b)
+    \item binari (a+b)
+    \item ternari (a?b:c che significa "if a then b, else c")
+\end{itemize}
+
+In Swift il confronto tra due oggetti funziona con ==. L'operatore === confronta se due variabili puntano allo stesso indirizzo di memoria.
+Non esistono gli operatori ++ e --.
+
+\subsection{Gestione dell'overflow}
+In Java l'overflow non causa l'eccezione ma un bug. 
+\begin{Java}
+    int a = Integer.MAX_VALUE - 1;
+    int b = Integer.MAX_VALUE - 1;
+    int c = a + b;
+    System.out.println(c); //-4
+\end{Java}
+In Swift gli overflow generano un'eccezione a run-time. 
+\begin{Swift}
+    var a = Int.max
+    var b = Int.max
+    let c = a + b
+    print(c) //error: Execution was interrupted
+\end{Swift}
+
+La gestione dell'overflow in Swift aiuta a risolvere il problema ed evita che l'errore si propaghi. Non previene un errore comune, ma ne limita gli effetti e lo rendo più semplice da risolvere. 
+
+\subsection{Operatori di range}
+Gli operatori permettono di creare rapidamente dei grupppi di interi o elementi contigui di un array.
+\begin{Swift}
+    for i in 1...5 {
+        print(i)
+    } //1, 2, 3, 4, 5
+    for i in 1..<5 {
+        print(i)
+    } //1, 2, 3, 4
+    let names = ["Anna", "Alex", "Brian", 
+    "Jack"]
+    for i in names[1...2] {print(i)} //Alex, Brian
+    for i in names[...1] {print(i)} //Anna, Alex
+    for i in names[2...] {print(i)} //Brian, Jack
+\end{Swift}
+
+\subsection{Collezioni}
+Sono predefinite tre strutture dati principali:
+\begin{itemize}
+    \item array: possono essere definiti con $Array<Element>$ o $[Element]$
+    \item set: sono definiti $Set<Element>$, non possono contenere duplicati. Abbiamo a disposizione gli operatori tipici insiemistici (unione, intersezione, ecc.)
+    \item dictionary: sono analoghi alle mappe in Java, un insieme di coppie di elementi, in cui il tipo del primo e del secondo elemento sono definiti
+\end{itemize}
+
+\subsection{Selezione con costrutto guard}
+Guida il programmatore a scrivere il codice in modo più leggibile. Il costrutto guard verifica che valga una determinata condizione ed esegue del codice nel caso in cui non sia valida.
+Nel caso in cui non sia valida, si esce dalla funzione, si segnala un errore o si genera un'eccezione.
+È un costrutto if in cui si considera solamente il caso in cui la condizione non sia verificata.
+\begin{Swift}
+    func divide(numerator: Int, denominator: Int) {
+        guard denominator != 0 else {
+            print("non si puo'")
+            return
+        }
+        print(numerator/denominator)
+    }
+    
+    divide(numerator:10, denominator: 2)
+\end{Swift}
+

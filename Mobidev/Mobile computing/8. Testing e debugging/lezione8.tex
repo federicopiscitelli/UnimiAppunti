@@ -1,0 +1,213 @@
+\begin{center}
+    \textbf{--------- Lezione 8 - 21 ottobre 2020 ---------}
+\end{center}
+
+\section{Approccio alla scrittura del codice}
+La scrittura di un programma di un sistema complesso passa attraverso una serie di errori. 
+
+Uno degli errori più comuni è scrivere tutto o buona parte del codice e poi verificare se l'effetto finale del software realizzato è quello desiderato. 
+Il problema è che non funziona mai al primo tentativo e correggere gli errori diventa molto complicato, perché non si sa dove possono essere.
+
+L'idea è quella dividere il processo di sviluppo in tanti piccoli passi, ognuno dei quali può essere provato per controllarne il funzionamento. 
+Più difficile è il codice che si scrive, più i passi devono essere piccoli. Anche una sola riga di codice, se ad esempio si sta usando una tecnologia che non si conosce bene. 
+
+Il problema è che, a volte, abbiamo delle righe di codice che non producono un effetto visibile, come la gestione degli eventi. 
+Per questo bisogna scrivere del codice per verificare lo stato di un'applicazione, come l'utilizzo di messaggi di log.
+
+Il tempo di sviluppo è in buona parte dedicato a correggere gli errori soprattutto quando lo sviluppatore è inesperto che scrive tutto il codice insieme. 
+Ridurre il numero di errori e il tempo necessario per correggerli è 
+l’obiettivo principale se si vuole sviluppare velocemente.
+
+Dividere il codice in piccole parti verificabili è difficile. 
+Prima di iniziare a sviluppare una parte di codice bisogna pensare a come suddividerla in parti, sfruttando l'utilizzo di carta e penna, o di algoritmi in pseudo codice. 
+Un errore comune è che viene provata l'app senza sapere cosa aspettarsi. Prima di fare una prova bisogna pensare a cosa ci si aspetta che sia il risultato.
+
+Diverse parti del codice vengono adattate da esempi trovati online. Questi sono i casi nei quali è più facile commettere errori, perché magari non conosciamo esattamente le operazioni che fa il codice. 
+
+Due strategie di sviluppo sono:
+\begin{itemize}
+    \item top-down: iniziare a scrivere le funzioni principali per poi scrivere i metodi di dettaglio che sono necessari per le funzioni principali
+    \item bottom-up: iniziare a scrivere i metodi di dettaglio per poi comporli nelle funzioni principali
+\end{itemize}
+
+Prendiamo ad esempio un algoritmo di ordinamento di un array composto da due funzioni:
+\begin{itemize}
+    \item la funzione principale di ordinamento
+    \item la funzione che scambia il valore di due elementi dell'array
+\end{itemize}
+Nell'approccio top-down prima viene scritta la funzione principale di ordinamento, poi quella che scambia i due valori
+
+Nell'approccio bottom-up prima viene scritta la funzione che scambia i due valori, poi quella di ordinamento.
+
+Nella programmazione tipicamente si usa una combinazione di approccio bottom-up e top-down.
+
+%%%%%%%%%%%%% inizio esempio di algoritmo passo passo %%%%%%%%%%%%%
+\begin{comment}
+
+\subsection{Esempio: definizione e problema}
+Abbiamo un array che contiene tutte le parole scambiate in 10.000 conversazioni su un sistema di chat. Ogni elemento dell'array è una singola parola. 
+L'obiettivo è scrivere un metodo per trovare quante volte occorre una data parola. 
+
+\begin{Java}
+    //codice
+    ArrayList<String> = wordsArray = ...
+    //altro codice
+    int a = wordCount(wordsArray, "ciao"); 
+    //stampa del valore di a
+\end{Java}
+\newpage
+La prima operazione è quella di ideare la procedura e scrivere il procedimento che risolve il problema: \\
+input: array di parole e una parola \\
+Output: il numero di volte che la \\
+parola occorre nell’array \\
+Procedura: \\
+- Inizializzo un contatore a zero \\
+- Scorro tutte le parole \\
+dell'array \\
+
+
+Poi possiamo procedere a convertire l'algoritmo in codice passo dopo passo:
+\begin{itemize}
+    \item passo 1: creo un metodo che ritorna sempre lo stesso valore
+    \begin{Java}
+        private int wordsCount(ArrayList<String> words,
+                                String target) {
+            return 0;
+        }   
+    \end{Java}
+    \item passo 2: inizializzo e ritorno il contatore
+    \begin{Java}
+        private int wordsCount(ArrayList<String> words,
+                                String target) {
+            int counter = 0;
+            return counter;
+        }   
+    \end{Java}
+    \item passo 3: verifico di saper scrivere un codice che scorre tutti gli elementi
+    \begin{Java}
+        private int wordsCount(ArrayList<String> words,
+                                String target) {
+            int counter = 0;
+            for(String word:words){
+                counter++;
+            }
+            return counter;
+        }   
+    \end{Java}
+    \item passo 4: verifico di saper controllare se la prima parola dell’array è quella cercata
+    \begin{Java}
+        private int wordsCount(ArrayList<String> words,
+                                String target) {
+            int counter = 0;
+            String word = words.get(0);
+            if (word.equalsIgnoreCase(target))
+                counter++;
+            return counter;
+        }   
+    \end{Java}  
+    \item passo 5: metto assieme i due passi precedenti 
+    \begin{Java}
+        private int wordsCount(ArrayList<String> words,
+                                String target) {
+            int counter = 0;
+            for(String word:words){
+                if (word.equalsIgnoreCase(target))
+                counter++;
+            }
+            return counter;
+        }   
+    \end{Java} 
+\end{itemize}
+\end{comment}
+%%%%%%%%%%%%% fine esempio di algoritmo passo passo %%%%%%%%%%%%%
+\section{Testing}
+Il testing di un'app ha lo scopo di valutare diversi aspetti:
+\begin{itemize}
+    \item funzionalità: l'applicazione fa quello che dovrebbe?
+    \item usabilità: l'utente riesce ad usare l'app come previsto?
+    \item performance: l'applicazione ha le performance desiderate?
+    \item sicurezza: l'app è soggetta ad attacchi di sicurezza o privacy?
+\end{itemize}
+
+Se emergono problemi durante il testing significa che l'operazione è efficace. 
+Se non emergono problemi in fase di test l'applicazione è corretta oppure non sono stati svolti i test corretti. 
+
+Il testing sui dispositivi mobili ha diverse peculiarità: 
+\begin{itemize}
+    \item i dispositivi sono diversi dal punto di vista hw e sw
+    \item diversi contesti di utilizzo: c'è connessione ad internet? potrebbe essere molto rallentata? i server a cui l'app si connette funzionano o sono molto lenti? ecc.
+    \item interrupt che avvengono durante l'uso
+    \item il codice su dispositivi mobili è basato su eventi. La sequenza con cui avvengono gli eventi spesso non è deterministica e di fatto si pongono dei problemi di concorrenza
+\end{itemize}
+
+Il fatto che l’applicazione funzioni una volta non significa che sia corretta perché potrebbe presentare degli errori in futuro, anche se eseguita nello stesso modo sullo stesso HW, SW, nello stesso contesto e con gli stessi interrupt.
+
+Per effettuare un test di un'applicazione concorrente, dobbiamo provare tutte le possibili combinazioni di ordine di chiamate.
+Questo però è un problema, perché provare tutte le combinazioni  per ogni device in commercio, è impossibile.
+
+Al posto che svolgere tutti i test per tutti i possibili casi, ciascun test si svolge solo in alcuni caso. In questo modo si hanno meno casi, ma è possibile che qualche caso problematico sia tralasciato. 
+\\ Linee guida e best practice da utilizzare:
+\begin{itemize}
+    \item scegliere i dispositivi più diffusi e caratteristici, tipicamente almeno 2 smartphone e 2 tablet
+    \item svolgere i test con la versione minima supportata del SO e uno con la versione più recente
+    \item svolgere i test in assenza di problemi e in presenza dei problemi più comuni come la mancanza o il rallentamento della connessione
+    \item verificare il funzionamento di tutto il codice
+    \item provare l'app su dispositivi diversi
+    \item provare l'app in situazioni particolari come assenza o rallentamento della connessione Internet
+\end{itemize}
+
+Fare il test di un’applicazione è un’operazione lunga, soggetta ad 
+errori che deve essere fatta ogni volta che si mette mano al codice. L'idea è quella di automatizzare il test. 
+
+Alcuni parti possono essere automatizzate, scrivendo del codice che verifica la correttezza di altre parti del codice. 
+\\ Questo codice può, ad esempio, creare istanze delle classi del model o generare degli eventi su oggetti di interfaccia. 
+
+Esistono diverse librerie che supportano i test automatizzati. I test automatizzati hanno una chiamata "assert" che indica cosa ci si aspetta sia vero. 
+Se tutti gli assert sono verificati, il test ha successo, altrimenti fallisce.
+\\ Un esempio ne è il testing del model: viene creata un'istanza della classe che si vuole testare, si richiama il metodo e si verifica, attraverso un assert, che il risultato del metodo sia quello che atteso.
+ 
+Un altro esempio è il testing della view-controller: ci sono librerie che permettono di scrivere del codice al cui interno si possono scatenare degli eventi sugli oggetti interfaccia, ovvero simulare un'azione che farebbe un utente e si verifica che il risultato sia quello atteso.
+
+\subsection{Pro e contro dell'automazione del testing}
+Il vantaggio del testing è che dopo aver scritto il codice di test, il test avviene molto velocemente. 
+La scrittura di test, però, è onerosa ed è soggetto ad errori: può segnalare errori che non ci sono o ignorare errori che ci sono. 
+
+In generale il test automatizzato è molto vantaggioso per progetti che devono essere mantenuti nel tempo, cioè quasi tutti i progetti commerciali, mentre nei prototipi a volte potrebbe essere controproducente. 
+
+Si può verificare il comportamento delle singole componenti attraverso unit testing. 
+
+\section{Debugging}
+Il debugging funziona meglio se combinato con una procedura di scrittura passo passo. 
+Il debugging è la procedura attraverso la quale si identifica e risolve un bug, cioè un problema che causa un malfunzionamento.
+
+Si divide in tre passi principali:
+\begin{itemize}
+    \item riprodurre il malfunzionamento: per algoritmi deterministici è semplice, lo stesso input produce sempre lo stesso output deterministico, ma in realtà in casi pratici non è così. Se si effettua un test manuale (non automatizzato) bisogna trovare una serie di passaggi che generino sempre l'errore: se i passaggi sono lunghi da riprodurre, è conveniente modificare temporaneamente il codice per velocizzare il test
+    \item trovare il bug: vengono usati due strumenti principali: logging e debugging. È possibile eseguire un'applicazione in modalità debugging: l'esecuzione si ferma in alcuni punti definiti dal programmatore
+    \item risolvere il bug: ci sono varie strategie per trovare e risolvere gli errori:
+    \begin{itemize}
+        \item "piccoli passi"
+        \item tecnica "wolf fence": ricerca dicotomica
+        \item "torna indietro e prova": cancello delle righe commentando fino a quando non arrivo ad una riga in cui il codice funziona. Pian piano si decommenta
+        \item "semplifica il codice": se il bug si verifica in una riga di codice, ma è complicata. Si può riscrivere la riga di codice in più righe e andare a verificarle una dopo l'altra
+    \end{itemize}
+\end{itemize}
+
+\subsection{Logging}
+Una parte del codice dell'applicazione può essere finalizzata a stampare messaggi per il programmatore, così che possa capire meglio cosa accade nel codice. I log, a volte, vengono inseriti ancora prima di avere un bug, perché servono anche da documentazione del codice.
+In Android abbiamo accesso a tutti i log del sistema e il problema è che il nostro messaggio vada perso tra tutti gli altri. 
+È possibile filtrare i messaggi di log per:
+\begin{itemize}
+    \item processo: spesso selezionare il processo giusto non basta, perché ci sono tanti messaggi di log non scritti da noi, ma generati da altre componenti del nostro processo
+    \item importanza: vengono mostrati tutti i messaggi più importanti del livello scelto, ma a volte non basta
+    \item tag: per ogni messaggio si usa un TAG che permette di categorizzare il messaggio e un testo
+\end{itemize}
+
+\subsection{Errori comuni}
+\begin{itemize}
+    \item il messaggio d'errore non viene letto. In molti casi si può trovare il messaggio lungo e non sempre è semplice capirlo
+    \item testare l'app senza sapere cosa aspettarsi: prima di provare l'app bisogna avere chiaro cosa ci si aspetta che l'app faccia
+    \item l'app non fa ciò che dovrebbe: ad esempio va in crash
+    \item fare sempre le stesse operazioni durante le prove dell'applicazione, ma si rischia di testare le stesse parti del codice
+\end{itemize} 
+

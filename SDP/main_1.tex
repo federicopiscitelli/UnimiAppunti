@@ -1,0 +1,72 @@
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries}{}{0pt}{\Huge}
+  
+\newcommand{\tabitem}{~~\llap{\textbullet}~~}
+
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+
+\hyphenpenalty=5000
+\tolerance=1000
+
+\usepackage[title, titletoc]{appendix}
+\renewcommand{\appendixpagename}{Appendix}
+
+\newcommand{\quickwordcount}[1]{%
+  \immediate\write18{texcount -0 -sum -merge  #1.tex > #1-words.sum }%
+  \input{#1-words.sum}%
+}
+
+\newgeometry{left=30mm, right=30mm, top=25mm, bottom=25mm, includeheadfoot} % This has to come before the header and footer information
+
+\setlength{\headheight}{15pt}
+
+% For the main pages
+\fancypagestyle{bibliografiaStyle}{
+  \fancyhf{}
+  %\fancyhead[R]{\thepage}
+  \fancyfoot[C]{\thepage}
+  \fancyhead[C]{\textit{ \nouppercase{\leftmark}} }
+  \renewcommand{\headrulewidth}{1pt} % remove lines as well
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+% For title and chapter pages
+\fancypagestyle{plain}{ %
+  \fancyhf{} % remove everything
+  \fancyfoot[C]{\thepage} %should keep page number
+  \renewcommand{\headrulewidth}{0pt} % remove lines as well
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+
+\title{
+    \vspace{0.5in}
+    \includegraphics[scale=0.1]{images/logo.png}\\
+    %\vspace{1.1in}
+    \textbf{Sistemi distribuiti e pervasivi}
+}
+\author{
+    \vspace{0.1in}
+    Fabio Brambilla - Simone Malesardi - Federico Piscitelli - Omar Zaher \\
+    \vspace{0.1in}
+    Matricole Feb - 978989 - 970949 - 970944 \\
+    \vspace{0.1in}
+    Professore Claudio Bettini \\
+    \vspace{0.5in}
+    A.A. 2020/2021 
+}
+\date{Ultimo aggiornamento \today}
+
+\newcommand{\myparagraph}[1]{\paragraph{#1}\mbox{}\\}
+\renewcommand\labelitemi{\tiny$\bullet$} %comando per fare i pallini piccoli
+\renewcommand{\contentsname}{Indice}
+
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}

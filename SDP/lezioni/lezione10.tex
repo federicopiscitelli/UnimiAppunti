@@ -1,0 +1,215 @@
+\begin{comment}
+Chicco
+
+\section{Cos'è il contesto?}
+Le applicazioni tradizionali non sono in grado di capire il contesto di una richiesta. \\
+Le richieste ai sistemi tradizionali devono essere fatte esplicitando tutti i parametri del contesto. \\
+In un ambito context aware posso eliminare la richiesta dei parametri a percepirli da altre informazioni (Se voglio andare da X a Y, X potrebbe essere il punto dove mi trovo e Y potrebbe essere un luogo dove ho un meeting, se ho condiviso calendar ecc ecc)\\
+La comunicazione con il computer è difficile:
+\begin{itemize}
+    \item ci sono interfacce limitate, specialmente da mobile
+    \item abbiamo bisogno di un meccanismo automatico per acquisire e trasmettere il contesto della nostra richiesta
+\end{itemize}
+Ci sono molte definizioni di contesto e anche molte interpretazioni in ambito psicologico, filosofico o informatico.\\
+Dal vocabolario il contesto è:
+\begin{quote}
+    un insieme di circostanze o fatti che circondano un particolare evento o situazione (nel nostro caso una mobile service request)
+\end{quote}
+In informatica sono state proposte diverse definizioni:
+\begin{itemize}
+    \item luogo, tempo, persone circostanti, stagioni, temperatura...
+    \item luogo, ambiente, identità e tempo
+    \item stato d'animo, livello di attenzione, luogo, tempo, oggetti e persone circostanti
+\end{itemize}
+Una definizione comune è:
+\begin{quote}
+Context is any information that can be used to characterize the situation of
+an entity. An entity is a person, place, or object that is considered relevant to
+the interaction between a user and an application, including the user and
+applications themselves.
+\end{quote}
+Semplificando:
+\begin{quote}
+    Tutti i dati utili ad adattare il servizio (nel momento in cui si usufruisce di questo servizio)
+\end{quote}
+
+\section{Classificazione del contesto}
+TABELLA
+
+\section{Contesto temporale}
+Si considera non solo l'ora, il giorno, il mese la stagione.. ma soprattutto la storia del contesto gioca un ruolo importante. Ossia possiamo fare molto di più tenendo traccia del contesto (storia del contesto): possiamo derivare un nuovo contesto o predire il contesto
+
+\section{Adattività}
+La proprietà di un sistema di adattarsi a un dato contesto per fornire un servizio/esperienza migliore.\\
+Un sistema context-aware acquisice i dati per adattare automaticamente il suo comportamento.\\
+Molto importante in ambito mobile per:
+\begin{itemize}
+    \item cambiamenti nella connessione
+    \item cambiamenti nella batteria
+    \item cambiamenti della situazione dell'utente
+    \item cambiamenti nell'ambiente
+\end{itemize}
+\subsection{Tipi di adattività}
+\begin{itemize}
+    \item adattare le funzionalità: mostrare o nascondere funzionalità, cambiare il data flow, aumentare la cache, spostare più computazione server side ecc ecc
+    \item adattare i dati: il sistema potrebbe fornire dati più o meno precisi, qualità maggiore o inferiore
+\end{itemize}
+
+\section{Ottenere il contesto dai dati}
+\begin{itemize}
+    \item Basso livello: 
+    \begin{itemize}
+        \item Dati acquisiti dai sensori o altri sensori: dati raw dai sensori, informazioni explicite dal profilo utente, capacità del dispositivo mobile
+        \item Ottenuti da una elaborazione semplice e/o dalla funzione di dati raw: stima della banda di rete facendo la media su valori campione in uno slot di tempo
+    \end{itemize}
+    \item Alto livello:
+    \begin{itemize}
+        \item Derivati applicando inferenze sui dati di basso livello: il mood delle persone posso ricavarlo dalle attività delle persone, dal GSR rilevato al polso ecc ecc
+        \item possiamo ottenere info di alto livello riutilizzando info di alto livello
+    \end{itemize}
+\end{itemize}
+
+\subsection{Metodi di inferenza}
+Due categorie di approcci: statistici e simbolici.
+I simbolici sono basati sulla logica (horn, logica descrittiva, ecc), mentre gli statistici sono quelli dati dal machine learning (classificazione e clustering)
+
+\subsection{Riconoscimento delle attività}
+....
+
+\section{Rappresentare il contesto}
+È importante per diverse ragioni: 
+
+________________________________________
+Fabbio
+
+\textbf{Unserstandig context}
+Le applicazioni tradizionali non sono i ngrado di capire il contesto. Ad esempio un servizio nell'ambito del pervasive. Nei sistemi tradizionali se faccio una richiesta devo specificare troppe cose. 
+In un ambito context aware il sistema, in base a diversi parametri sia di preferenza personale sia di dati presi dall'ambiente riesce a fornirmi un'esperienza adeguata a quella che cerco senza che io gli specifichi le cose.
+Nei sistemi pervasivi si vuole chiedere il meno possibile al sistema ma far si che sia il sistema ad anticipare quello che vogliamo
+
+\textbf{Defining context}
+In generale si vorrebbe poter dire con la voce
+
+\textbf{Early defintions}
+In alcuni casi si elenca cosa significa "contesto".
+(slide)
+(F1,f2,f3 erano puntatori ad articoli)
+
+\textbf{A common definition}
+(Definizione sulla slide) TUtta l'informazione che riguarda una persona, posto, oggetto ma non in generale...
+
+\textbf{Classification of context}
+(slide)
+via celoria 18
+
+\textbf{Temporal context}
+Il tempo svolge un ruolo fondamentale. La storia del contesto svolge un ruolo fondamentale. Può essere utile per capire le abitudini.
+
+\textbf{Adaptiveness}
+L'obiettivo dell'acquisizione del contesto è l'adattività del sistema al contesto. 
+Vogliamo un sistema che cambia nel tempo (Si adatta).
+Dunque acquisisce dati da vari fattori e cambia il suo comportamento di conseguenza. 
+
+\textbf{Adaptive video streaming}
+Progetto del prof per ottimizzare la fruizione del video adattandolo al contesto.  Idea che dati di contesto arrivano da più fonti.
+
+\textbf{Types of adaptiveness}
+\begin{itemize}
+    \item Adapting functonality: A seconda del contesto il sistema ti mostra solo alcune funzionalità del servizio.
+    \item adapting data: Il sistema non agisce sulle funzionalità ma sui dati trattati. 
+\end{itemize}
+
+\textbf{Obtaining context data}
+
+\textbf{inferring context data}
+High-level context: 
+
+\textbf{Inference methods}
+Due categorie principali
+statistici: Machine learning. DUe task più noti classificazione e clustering
+simbolici: Basati sulla logica
+
+\textbf{Activity recognition}
+Fase di preprocessing: in cui si prendono i dati grezzi e si cerca di ridurre il rumore
+suddivisione in finestre temporale
+aggregazione dei segnali
+
+\textbf{Hybrid reasoning}
+
+\textbf{Context representation}
+Perchè dovremmo rappresentarlo? I dati innanzitutto sono ottenuti da sorgenti etereogenee. E' possibile che queste sorgenti utilizzino diverse semantiche. Non c'è uno standard per i dati di contesto quindi c'è una mancanza di semantica condivisa...
+
+\textbf{Requirements}
+________________________________
+
+омар 
+
+Le applicazioni tradizionali non sono in grado di capire il contesto. Se faccio una richiesta ad un sistema tradizionale devo specificare un sacco di cose sul contesto, in contrasto con un sistema context-aware che può intuire molte di queste.
+Dunque, in generale, è possibile rendere più smart i servizi utilizzando il contesto.
+Quando ci si trova ad utilizzare un sistema mobile o pervasivo si vuole interagire il meno possibile con il sistema, per questo motivo questi servizi sono importanti.
+Per contesto si intende: location, time, surrounding people, ecc...
+Ciascun articolo utilizza una definizione diversa.
+
+Una tra le varie definizioni che spesso si cita è quella di Anind Dey: è tutta l'informazione che riguarda una persona, un posto o un oggetto, ma non in generale. Stiamo sviluppando sistemi per offrire servizi anticipando i bisogni. Nella situazione in cui un'entità vuole usufruire di un servizio, tutto ciò che caratterizza quella situazione può essere utile per adattare il servizio e lo chiamiamo contesto.
+
+Qualcuno ha cercato di farne una tassonomia, visto che le componenti del contesto sono molte, ma questo ovviamente non è scolpito nella pietra. Sono dinamici ed in divenire, poiché si possono sviluppare nuovi metodi per capire una certa dimensione.
+
+Il contesto temporale svolge un ruolo fondamentale nell'adattamento. Non soltanto il mese, la stagione, ecc..., ma soprattutto la storia del contesto nel tempo, avendo l'autorizzazione di conservarlo. Se riesco a correlare la storia del contesto posso capire le sue abitudini rispetto a cosa fa quel giorno, in quell'ora, ecc... Utile quindi tenere traccia del contesto per dedurre nuovo contesto e predire contesto. L'idea è quindi che il sistema proponga qualcosa senza effettuare alcuna richiesta.
+
+L'obiettivo dell'acquisizione dei dati del contesto è l'adattività del sistema pervasivo. Vogliamo un sistema che cambia nel tempo. Vogliamo che il sistema cambi il comportamento ed impari a cambiarlo meglio, in alcuni casi. Acquisisce i dati e modifica il comportamento per ottimizzare il servizio. Questo è importante anche in ambito mobile per capire i cambi nella rete, nella fruizione dell'energia, l'interfaccia che si sta usando al momento, la situazione in cui ci si trova e cambiamenti dell'ambiente. Tutte queste sono adattamento e si può fare a diversi livelli. 
+
+Due modi per adattare i servizi:
+- adattare la funzionalità offerta, a seconda di quel che sistema capisce fa vedere solo determinate funzionalità, aumentare cache, muovere computazioni server side, ecc.
+- adattare i dati, usando dati più o meno preicisi
+
+Quando si parla di ottenere dati di contesto:
+- dati di baso livello: acquisiti direttamente dai sensori o altre sorgenti. Vado semplicemente a leggerli. Consideriamo anche di basso livello i dati ottenuti attraverso un semplice processing o una fusione (ad esempio la media).
+- dati di alto livello: contesto ottenuto nell'applicare metodi di inferenza sul contesto di basso livello, che possono anche essere piuttosto complicati. Posso utilizzare contesto di alto livello per derivare altro contesto di altro livello.
+
+Quello di basso livello si acquisisce con un accesso diretto attraverso l'architettura. Alto livello ha bisogno di applicazione di metodi di inferenza sul basso livello. Questi modi di inferenza possibili sono:
+- approcci statistici, machine learning. I due task più noti sono quelli della classificazione (dato un insieme di dati e cateogrie, capire a quali categorie questi dati fanno riferimento) e clustering (cerca di mettere insieme insieme di dati, per esempio per scoprire nuove attività che non fanno parte delle categorie e creare una nuova categoria).
+- approcci simbolici, basati sulla logica.
+
+Se riesco a capire che attività una persona sta facendo, riesco ad adattare meglio il servizio che devo fornire. Questo è ad alto livello. C'è una fase di preprocessing, qindi prendiamo i dati grezzi dai sensori e cerchiamo di ridurre il rumore, rendendo più evidenti i fenomeni che devono caratterizzare. Si suddividono i fenomeni in finestre temporali e si aggregano i segnali, calcolando le caratteristiche dei segnali in quei segmenti. Dopodiché si cerca di allenare un certo modello.
+Facciamo fare attività a degli utenti, annotiamo le ground truths, quindi associamo delle misure che abbiamo acquisito con una verità, quindi alla cetegoria che sappiamo qual è. ALleniamo il modello con i dati e con la categoria osservata, finché non sarà pronto. A questo punto, lo posso utilizzare ed il sistema, guardando i dati fa una predizione senza che nessuno osservi la categoria, tipicamente associando una probabilità/confidenza a questa predizione.
+Ci sono metodi completamente basati su approcci simbolici anche per il riconoscimento di attività.
+I metodi più efficaci per questo tipo di inferenze si sono rilevati quelli statistici, con la difficoltà che i metodi logici hanno di rappresentare l'incertezza.
+Ci sono anche molti modi di combinare i due metodi di inferenza. Esistono diversi modi epr farlo, uno dei quali è metterli in sequenza: usiamo lo statistico, facciamo una predizione e poi confrontimao la predizione fornita (le due o tre su cui è incerto il modello statistico) e proviamo a vedere le regole simboliche, utilizzando il contesto.
+Dai dati del sensore possiamo andare a fare ragionamenti di common sense reasoning, ad esempio dove si svolge tipicamente l'attività. Questi ragionamenti possono aiutare. Quello che facciamo con questi ragionamenti è astrarre, cosa che le macchine fanno ancora fatica a fare. L'uso di questo aiuta a raffinare le predizioni.
+
+I dati sono ottenuti da sorgenti eterogenee. È anche psosibile che utilizzino diversi linguaggi per fornire questi dati. Non c'è una semantica condivisa di solito (standard per tutti i tipi dati di contesto). Serve un common representation language e se voglio automaticamente rielaborarlo ho bisogno di una rappresentazione formale in qualche linguaggio. 
+
+I requisiti di un modello di rappresentazione dei dati sono:
+- eterogeneità dei dati
+- ci piacerebbe riuscire a collegarli, poiché ci sono correlazioni nei dati (catturare relazioni)
+- voglio rappresentare la storia
+- voglio rappresentare il livello di incertezza
+- voglio riuscire a fare ragionamento
+- vorrei che fosse facilmente utilizzabile ed efficiente
+
+Per singole applicazioni molto semplici che non devono condividere dati con altri si può usare un sistema molto semplice: modello Flat. Utilizzo una chiave e un valore. Nessuna struttura. Utilizzato da molti application server commerciali. Qualcuno ha cercato di arricchirli un po' con delle gerarchie di attributi usando strutture con XML con un opportuno schema. Il modello flat dà usability, efficiency (poiché reperire questi dati è immediato) e più o meno anche eterogeneità ed estensibilità.
+
+Proposta intermedia: se vogliamo catturare relazioni tra i dati di contesto possiamo usare CML (non più utilizzato), che è una variante dell'E/R in cui sono stati introdotti dei simboli particolare tipici della rapprestanzione delle informazioni di contesto derivanti anche dai sensori. Questo va a migliorare, rispetto al flat, la capacità di rappresentazione delle relazioni e delle dipendente del contesto. Seppur in forma limitata consente anche di rappresentare l'incertezza, tuttavia non ha un sistema di ragionamento automatico. Cattura qualche aspetto temporale, ma in modo limitato. Al massimo c'è una memorizzazione del tempo, non c'è un ragionamento, fino a SQL 2011 (?).
+
+Ontologie: strettamente legato alla rappresentazione simbolica. Per ontologia si intende una specifica formale di uan concettualizzazione (come E/R) condivisa. Cerchiamo di dare una specifica formale ai dati del contesto e alla conoscenza comune in modo condiviso. Una votla d'accordo, tutte le applicazioni possono usarla e se riusciamo a mettere nel midleware qualcosa che fa ragionamento su queste cose, possiamo arrivare a realizzare sistemi intelligenti. Il linguaggio che si usa è una famiglia di linguaggi che si chiama logiche descrittive, che è un sottoinsieme della logica del primo ordine e permette di modellare domini complessi. Ha semantica formale e fa ragionamento automatico e capire se per esempio è stata fatta una descrizione incosistente. Il lignuaggio è OWL per definire ontologie, proposto da w3c (specifica logica descrittiva in cui sono stati selezionati degli operatori). UN modello di questo genere supporta:
+- consistenza
+- relaization, ho insieme di osservazioni che non sono concetti. Sono contesto di basso livello. Dato un insieme di osservaizoni va a vedere qual è la categoria che cattura queste osservazioni. attività di inferenza basata su regole logiche del contesto
+- ???
+Ci sono strumenti per fare questo.
+
+Le architetture possono anche essere miste. possiamo fare una prima derivazione di contesto di alto livello con machine learning, capiamo l'azione base che sta facendo, la mettiamo insieme ad altri dati che ci arrivano da altre sorgenti, le metto insieme facendo una forma di aggregazione e poi la passo ad ontologia che mi dice a quale attività corrisponde.
+
+Non è la soluzione definitva. Non sono nate per supportare incertezza, ci sono tentativi. L'incertezza nella rapprestentzaione dei dati di contesto è da investicare, così come i dati storici. Se ontologia complessa non può essere fatta su dispoitivi, ma dev'essere fatta cloud just in time.
+
+in questo momento non esiste un vero ep orpio supporto middleware che includa tutto questo, tranne proposte in ambito di ricerca. I metodi di inferenza si stanno ancora raffinando, anche se la più efficiente è machine learning con correzioni del simbolico. Supporto middleware dovrebbe integrare:
+-
+-
+-
+-
+-
+
+
+
+
+
+\end{comment}

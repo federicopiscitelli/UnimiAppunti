@@ -1,0 +1,440 @@
+Non è sufficiente far comunicare i processi in un sistema distribuito per realizzare le funzionalità del sistema. Ci serve praticamente sempre una qualche forma di coordinamento tra le computazioni che ci sono nei vari nodi e quindi coordinare anche le comunicazioni che occorrono per raggiungere gli obbiettivi.
+
+Gli algoritmi di sincronizzazione prevedono uno scambio di messaggi (solo in questo modo i nodi possono parlare e organizzare il loro coordinamento).
+
+\section{Clock Synchronization}
+
+All'interno di un sistema distribuito, ogni nodo è indipendente ed ha quindi un proprio clock interno. Questo clock non è perfetto. Quando ogni macchina ha il proprio clock, un evento che si è verificato dopo un altro evento può comunque essere assegnato ad un timestamp precedente, dunque i sistemi non possono semplicemente basarsi sul confronto dei timestamp.
+
+\section{Physical Clocks}
+
+Non è possibile sincronizzare perfettamente gli orologi, poiché ci sono i tempi di latenza della rete. Possono, però, essere sincronizzati con un certo livello di approssimazione rispetto al tempo preciso. Il riferimento principale è l'UTC.
+
+Il modo in cui noi misuriamo il tempo deriva dall'osservazione di fenomeni astronomici. Di fatto, il tempo è la distanza tra due eventi. Gli orologi comuni dividono il giorno solare medio basandosi sull'oscillazione dei cristalli di quarzo. L'orologio atomico, invece, misura il tempo in termini di transizioni di un atomo di Cesio 133. Dal giorno solare medio viene derivato il secondo solare medio, che corrisponde a circa 9 miliardi di transizioni di Cesio.
+
+Una serie di istituti per la misurazione del tempo, che hanno degli orologi atomici, si accordano tra di loro, facendo una media, dopodiché delle stazioni si occupano di distribuire questo tempo quasi perfetto (TAI). Il TAI non è comunque perfettamente preciso, poiché l'universo non è regolare (la rotazione della Terra diminuisce, i fenomeni astronomici mutano, etc). Dunque, questi istituti, quando si accorgono che ci si sta discostando dall'osservazione astronomica, aggiungono dei secondi chiamati leap seconds che non sono periodici. Questo di solito viene fatto a capodanno.
+
+UTC = TAI + leap seconds
+
+L'ideale è che i nodi di un sistema distribuito corrispondano tutti all'UTC, ma questo non è possibile. Nella realtà, tutti gli orologi saranno più lenti o più veloci, quindi dovranno essere sincronizzati più o meno frequentemente in base a quanto divergono dal perfect clock.
+
+\section{Synchronizing Physical Clocks}
+
+\subsection{GNSS}
+
+È possibile utilizzare i GNSS per ottenere il tempo, poiché i satelliti dei sistemi GNSS hanno a bordo degli orologi atomici. Ogni satellite di un GNSS fa un broadcast di messaggi che contengono il timestamp dell'orologio atomico (nel momento in cui viene inviato il messaggio), oltre all'identificatore del satellite stesso. Il ricevitore ascolta più satelliti e usa metodi di geometria computazionale per determinare la propria posizione (dimensione spaziale) e una dimensione temporanea. Il tempo ottenuto dal GNSS ha una precisione dell'ordine dei micro o addirittura dei nanosecondi (ma dipende in realtà dalla precisione del GNSS).
+
+Il GPS è il sistema di navigazione satellitare globale (GNSS) più utilizzato e riesce a calcolare la posizione guardando quanto tempo impiega il segnale ad essere trasmesso dal satellite al ricevitore e capendo a quante unità di distanza si trova, da qualche parte su una circonferenza. Ricevendo la posizione da un secondo satellite riduce le possibili soluzioni a due punti, ed aggiungendo un terzo satellite deduce più facilmente quale dei due possa essere. Dunque, se il nodo del sistema distribuito ha un GPS, allora ha già un modo per sincronizzarsi in maniera abbastanza precisa con l'UTC. 
+
+Complicazioni del GPS:
+\begin{itemize}
+    \item ci vuole del tempo prima che i dati sulla posizione di un satellite raggiungano il ricevitore. 
+    \item l'orologio del ricevitore generalmente non è sincronizzato con quello del satellite.
+    \item la precisione del GPS è principalmente disturbata nel caso in cui il segnale faccia fatica ad arrivare, anche a causa di fenomenti metereologici. Esistono metodi di aggiustamento che si appoggiano a delle stazioni a terra che, osservando i fenomeni metereologici, forniscono l'aggiustamento. 
+\end{itemize}
+
+\subsection{Cristian’s algorithm and Network Time Protocol}
+
+Se un nodo del sistema distribuito non ha un GPS, il metodo più comune è rivolgersi ad un server. L'algorimo NTP deriva dall'algoritmo di Cristian: si ispira a quello, ma è stato perfezionato per riuscire a stimare meglio i ritardi dovuti alla rete. 
+
+Non prevede una banale architettura client-server, bensì prevede una gerarchia di server NTP divisi per strato. Lo strato 1 riguarda gli NTP server che hanno un orologio atomico o sono collegati ad esso con una rete a latenza bassissima. Gli strati inferiori, invece, garantiscono meno precisione. 
+
+Il client fa una richiesta ad un server NTP, supposto avere un'ora più o meno precisa, chiedendo l'UTC. L'aspetto complicato di questo algoritmo è calcolare le latenze.  L'idea è che nel messaggio di richiesta venga inserito anche il timestamp. Conoscendo i timestamp di invio/ricezione della richiesta/risposta, può essere calcolata la distanza tra invio e ricezione della richiesta e la distanza tra invio e ricezione della risposta, dividendo per 2 (approssimazione, non è detto che siano uguali). Per fare un'approssimazione migliore di queste latenze, viene ripetuta l'operazione più volte. NTP permette di raggiungere un'accuratezza nell'ordine dei millisecondi.
+
+\subsection{Berkeley Algorithm}
+
+Fino a qui abbiamo visto due metodi (più utilizzati) per effettuare la sincronizzazione con il tempo reale. Non tutti i sistemi, però, hanno bisogno di questo. Se il sistema deve interagire con misure provenienti dal tempo reale, allora è opportuno, in altri casi, quando il sistema è chiuso, potrei anche accontentarmi del fatto che i nodi siano semplicemente tutti sincronizzati su un tempo.
+
+Uno dei nodi funziona da Time Daemon e manda a tutti quanti (anche a se stesso) il proprio orario. I nodi rispondono con la differenza del loro orologio rispetto a quello che hanno ricevuto. Il Time Daemon calcola quindi una media tra gli orari e comunica a tutti di sistemarsi su questa media. 
+
+Non importa che sia l'orario vero oppure no e spesso questo algoritmo viene utilizzato in un ambiente ristretto, dove i nodi sono collegati attraverso una banda larga, per cui la latenza non viene solitamente presa in considerazione. Attenzione, però, che portare indietro un orologio non è una cosa indolore. Quello che avviene, di fatto, è farlo rallentare finché non è allineato, come se fosse stato portato indietro.
+
+\section{Lamport’s Logical Clocks}
+
+In molti casi non è necessario che i nodi concordino sul valore dei loro orologi fisici, bensì è possibile semplicemente utilizzare dei contatori o degli orologi logici (possono essere immaginati come dei contatori). Questo è possibile quando nel sistema distribuito è sufficiente avere una conoscenza condivisa sull'ordine parziale degli eventi, cioè quando occorre che il sistema sappia cosa è accaduto prima/dopo di qualcos'altro. 
+
+Un evento può essere:
+\begin{itemize}
+    \item evento interno: ogni nodo ha un processo in esecuzione e ci sono eventi che riguardano processing locale
+    \item messaggio inviato/ricevuto
+\end{itemize}
+
+Il tempo aumenta sempre, dunque utilizzando un contatore con questa stessa proprietà, otteniamo un clock logico. All'interno di ogni nodo viene utilizzato un contatore intero come orologio logico e viene incrementato ogni volta che si verifica un evento interessante (inizialmente saranno tutti uguali a 0). Osservando lo stato del sistema, in un particolare istante, si potrà notare che gli orologi logici avranno valori diversi. 
+
+L'algoritmo di Lamport prevede che:
+\begin{itemize}
+    \item se A e B sono due eventi, l'espressione A $\rightarrow$ B denota la relazione (transitiva) A accade prima di B
+    \item C(A) è il valore di clock logico assegnato dal processo in cui si verifica A
+    \item Obiettivo: se A $\rightarrow$ B, allora C(A) $<$ C(B), anche se sono su due processi diversi
+\end{itemize}
+
+Se A e B sono eventi sullo stesso processo, il contatore viene semplicemente incrementato. Il problema si pone nel momento in cui A è l'evento di invio da un nodo e B è l'evento di ricezione su un altro nodo. Potrebbero verificarsi molti eventi prima di A e pochi eventi prima di B, avendo così C(A) maggiore di C(B). Ovviamente questo comportamento non va bene, dunque:
+
+\begin{itemize}
+    \item prima di eseguire un evento, incremento il contatore
+    \item quando il processo Pi manda un messagio m a Pj, inserisce il valore del contatore dopo l'incremento
+    \item Pj riceve il messaggio m, osserva il valore del contatore e lo confronta con il proprio. Dopodiché prende il maggiore e lo incrementa di uno
+\end{itemize}
+
+Questo, così come tutto ciò che vediamo nei sistemi distribuiti, si implementa attraverso un middleware.
+
+\subsection{Enforcing Total Order}
+
+Alcuni algoritmi vorrebbero un ordinamento totale dei timestamp nel sistema. Per evitare che due valori di clock nel sistema per due eventi diversi siano uguali, viene concatenato l'identificatore del processo (un qualsiasi numero che difficilmente si trovi in altri processi) al contatore. A questo punto, prendendo due valori di timestamp, è possibile stabilire un ordine totale tra questi: si osserva il valore di contatore maggiore/minore e, in caso di uguaglianza, si osserva l'identificatore maggiore/minore. L'obiettivo, quindi, è che ogni evento del sistema abbia associato un timestamp diverso. Attenzione, però, che un ordine totale dei timestamp non significa conoscere la relazione temporale tra ogni coppia di eventi.
+
+\section{Totally Ordered Multicast}
+
+Si assume che nessun messaggio venga perso e che i messaggi dallo stesso mittente vengono ricevuti nell'ordine in cui sono stati inviati.
+
+Il processo Pi invia un messaggio m\textsubscript{i} con un timestamp a tutti gli altri. Il messaggio stesso viene inserito in una coda locale i. Qualsiasi messaggio in arrivo su Pj viene accodato nella coda j, in base al suo timestamp, e viene inviato un ack di ricezione del messaggio ad ogni altro processo (gli eventi di invio e ricezione di messaggi e ack sono totalmente ordinati con Lamport). Pj passa un messaggio m\textsubscript{i} alla sua applicazione se:
+\begin{itemize}
+    \item m\textsubscript{i} è in testa alla coda j AND
+    \item m\textsubscript{i} è stato confermato da tutti gli altri processi 
+\end{itemize}
+
+Tutti i processi alla fine avranno la stessa copia della coda locale, quindi tutti i messaggi vengono passati all'applicazione nello stesso ordine ovunque.
+
+\section{Mutual exclusion}
+
+In un sistema distribuito, se un insieme di processi in esecuzione su sistemi diversi vogliono accedere ad una risorsa condivisa, occorre effettuare uno scambio di messaggi.
+
+\subsection{A centralized algorithm}
+
+Un processo, su uno dei nodi, viene utilizzato per gestire la coda. Gli altri nodi, con la solita modalità client/server, se necessitano di accedere alla risorsa lo richiedono al coordinatore. Se la coda è vuota, il coordinatore consente l'accesso, altrimenti il coordinatore non risponde (si suppone che sia sincrono, per cui il processo si blocca) ed inserisce la richiesta in coda. Nel momento in cui il coordinatore riceve il release da parte del processo che stava utilizzando precedentemente la risorsa, estrae la prima richiesta dalla coda (FIFO) e consente l'accesso. Il processo, a questo punto, si sblocca e riceve la possibilità di utilizzare la risorsa fino a che non la rilascerà. 
+
+I problemi di questo algoritmo sono:
+\begin{itemize}
+    \item single point of failure: in caso di crash del coordinatore nessuno potrà più accedere alla risorsa, a meno che non sia replicato in qualche modo
+    \item se l'utente non rilascia la risorsa, occorre un meccanismo di timeout (tempo limite di rilascio) dopo il quale viene tolta forzatamente
+    \item bottleneck: passano tutti per lo stesso coordintore
+\end{itemize}
+
+\subsection{A distributed algorithm}
+
+Si assume un ordinamento totale dei timestamp e una consegna affidabile dei messaggi, attraverso un meccanismo di ack. 
+
+Un processo P che vuole accedere ad una risorsa costruisce un messaggio contenente il nome della risorsa, l'id del processo ed il timestamp corrente (contatore + identificatore) e dopodiché invia il messaggio a tutti i processi, incluso se stesso.  Quando un processo Q riceve un messaggio, abbiamo 3 casi:
+
+\begin{itemize}
+    \item se Q non sta utilizzando R e non ha intenzione di farlo, risponde OK a P
+    \item se Q sta utilizzando R non risponde e accoda la richiesta
+    \item se Q non sta utilizzando R, ma ha intenzione di farlo, confronta il timestamp del messaggio con quello della propria richiesta. Se quello nel messaggio inviato da P è inferiore risponde OK a P, altrimenti accoda il messaggio
+\end{itemize}
+
+Dopo aver inviato il proprio messaggio, P attende un OK da tutti i processi prima di accedere a R. Quando P termina di utilizzare R, invia OK a tutti i processi che aveva precedentemente inserito nella sua coda e la svuota.
+
+Si potrebbe anche ipotizzare di utilizzare l'orologio fisico, ma, anche se fossero sincronizzati correttamente, ci si potrebbe comunque trovare nella situazione di avere più volte uno stesso timestamp, andando ad invalidare l'assunzione, a meno che non si aggiunga al timestamp l'identificatore del processo.
+
+I problemi di questo algoritmo sono:
+\begin{itemize}
+    \item la mancata risposta da parte di un processo può essere dovuta ad un suo crash
+    \item coinvolgere tutti i processi di un sistema distribuito optrebbe essere uno spreco di risorse (con l'aumentare dei nodi)
+\end{itemize}
+
+\subsection{A ring algorithm}
+
+Questo algoritmo utilizza una rete di collegamento tra i nodi che non rispecchia la rete di collegamento fisica. Partendo da un gruppo di processi non necessariamente ordinati viene costruito un anello logico, assegnando un identificatore univoco a ciascun processo in esecuzione sui diversi nodi del sistema. Dopodiché viene utilizzato un token, rappresentato da un messaggio, per gestire l'accesso alla risorsa. Il token viene fatto ruotare all'interno dell'anello e chi lo ottiene acquisisce la possibilità di accedere alla risorsa. Essendocene uno solo, non potrà mai essere in due nodi contemporaneamente. Quando il processo termina di utilizzare la risorsa passa il token al processo successivo. Non può usare due volte lo stesso token.
+
+I problemi di questo algoritmo sono:
+\begin{itemize}
+    \item nel caso in cui si dovesse avere il crash di uno dei nodi si spezzerebbe l'anello. Solitamente per avere un po' più di tolleranza si memorizzano k elementi in avanti
+    \item perdita del token
+\end{itemize}
+
+%TODO: inserire tabella comparativa
+
+\section{Election algorithms}
+
+Questi algoritmi prevedono una modalità con la quale un insieme di nodi si accorda su quale sarà il coordinatore, eleggendo il processo attivo (in qualsiasi istante potrebbe non esserlo più) con l'identificatore più alto in quel momento. Alcuni algoritmi presumono che ogni processo conosca gli ID e possa comunicare con qualsiasi altro processo. Tuttavia, non possono sapere se un processo è attivo. 
+
+Questi algoritmi non perdono di generalità: può essere creato un ordinamento totale utilizzando il criterio che si ritiene più opportuno nella realizzazione degli identificatori.
+
+\subsection{Bully Algorithm}
+
+Abbiamo un gruppo di processi, di cui uno con l'identificatore più alto. Nel momento in cui un processo, dopo aver tentato di comunicare con il coordinatore, si accorge che questo non è più attivo (timeout scaduto), indice un'elezione, inviando un messaggio a tutti i processi con ID maggiore del proprio (compreso il coordinatore precedente, che nel frattempo potrebbe essere tornato disponibile), non sapendo se questi sono attivi. Quando un processo attivo riceve un messaggio di elezione, risponde con un messaggio di OK. Se un processo riceve almeno un OK, esce dall'elezione, poiché vuol dire che c'è almeno un processo con l'ID più alto del suo che si occuperà dell'elezione. A questo punto, i processi che hanno dato l'OK manderanno nuovamente un messaggio di elezione ai processi con identificare più alto del loro, ripetendo la stessa procedura vista precedentemente. Alla fine, il processo che non riceverà alcuna risposta entro un certo timeout diventerà il coordinatore e manderà un messaggio in broadcast per informare gli altri nodi.
+
+Potrebbero essere indette più elezioni contemporaneamente, ma di solito dovrebbe vincere lo stesso nodo.
+
+\subsection{A ring-based election:\\ Chang and Roberts algorithm (1979)}
+
+Questo algoritmo utilizza una struttura ad anello, in cui i messaggi circolano in senso orario, senza fallimenti, e in cui i processi hanno un identificatore unico. L'obiettivo è eleggere il processo attivo con l'ID più alto (deve essere unico, anche nel caso in cui più elezioni siano indette in modo concorrente).
+
+L'algoritmo funziona nel seguente modo:
+
+\begin{itemize}
+    \item i processi sono contrassegnati da un valore booleano che indica se questi sono partecipanti o non, in maniera tale da poter fermare il prima possibile eventuali messaggi di altre elezioni che porterebbero allo stesso risultato
+    \item inizialmente tutti i processi sono contrassegnati come non partecipanti 
+    \item quando un processo Pk si accorge che il coordinatore non sta più rispondendo, indice un'elezione contrassegnandosi come partecipante e inviando al nodo successivo nell'anello un messaggio $<$ELECTION, ID(Pk)$>$
+    \item quando un processo Pm riceve un messaggio $<$ELECTION, ID(Pk)$>$:
+    \begin{itemize}
+        \item se l'ID del processo Pk contenuto nel messaggio è maggiore dell'ID del processo Pm, inoltra il messaggio al processo successivo nell'anello e si contrassegna come partecipante
+        \item  se l'ID del processo Pk contenuto nel messaggio è minore dell'ID del processo Pm, si contrassegna come partecipante e sostituisce l'ID presente nel messaggio con il proprio, inoltrandolo poi al processo successivo nell'anello. Se, invece, il processo era già contrassegnato come partecipante, ferma il messaggio, bloccando così l'elezione
+        \item se l'ID del processo contenuto nel messaggio è il proprio, vuol dire che non c'è nessun altro processo attivo con ID più grande. Si contrassegna, quindi, come non partecipante ed invia un messaggio $<$ELECTED, ID(Pm)$>$ al processo successivo nell'anello
+    \end{itemize}
+    \item quando un processo Pk riceve un messaggio $<$ELECTED, ID(Pm)$>$, si contrassegna come non partecipante, memorizza l'ID del coordinatore e, a meno che non sia lui stesso il coordinatore, inoltra il messaggio al processo successivo nell'anello
+\end{itemize}
+
+I problemi di questo algoritmo sono:
+
+\begin{itemize}
+    \item Errori di gestione: gli errori dovuti al crash dei nodi nell'anello vengono gestiti da ciascun processo memorizzando, non solo l'indirizzo del processo successivo, ma anche alcuni altri che lo seguono nell'anello. Se la comunicazione con il processo successivo fallisce, il messaggio viene inviato al primo tra quelli che lo seguono che è attivo
+    \item Elezioni simultanee: l'uso dello stato partecipante/non partecipante aiuta a estinguere il prima possibile i messaggi non necessari nelle elezioni simultanee 
+\end{itemize}
+
+Nel caso peggiore vengono scambiati 3n - 1 messaggi, cioè quando il coordinatore dovrebbe essere il nodo appena prima di quello che ha indetto l'elezione.
+
+Il caso peggiore si verifica quando il processo con l'ID più alto è il processo più vicino in senso antiorario a quello che indice l'elezione. In questo caso abbiamo bisogno di N - 1 messaggi per raggiungere il nodo, altri N messaggi per concludere l'elezione e N messaggi per annunciare il coordinatore, dunque 3N - 1. 
+
+%TODO: inserire immagini
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{comment}
+---------------
+Fabio
+
+Problemi di sincronizzazione:
+(uno degli aspetti fondamentali dei sistemi distribuiti). Serve una forma di coordimento tra le computazioni tra i nodi. Far comunicare un processo nell'ambiente dei sistemi distribuiti necessita di determinate tecnologie (socket, rpc..). 
+
+
+Clock synchronization:
+Problema tempo sistema distribuito: ogni nodo è indipendente e ha un suo clock interno. QUesto clock non è perfetto. Se ogni macchina ha il proprio clock con la propria precisione, ci si può trovare in situazioni strane ad esempio viene timpstampato ad un tempo precedente o futuro da quello effettivo. Basarsi su di un confronto di orologi diventa impossibile se hanno tempi diversi di clock. Come faccio a tenere gli orologi allineati?
+
+Clock fisico:
+E' possibile sincronizzare in maniera perfetta gli orologi di due diversi nodi? NO. Perchè ci sono i tempi di latenza di rete, sia che siano tanto distanti sia che siano sotto la stessa rete interna. Dunque si possono sincronizzare in maniera approssimata. 
+L'UTC è lo standard di tempo che viene utilizzato dai calcolatori. L'UTC viene dalla misurazione dei fenomeni astrologici. Più specificatamente utilizziamo il giorno solare medio. 
+
+UTC = TAI + leap seconds
+Il tempo preciso viene preso con degli orologi atomici che misura il tempo in termini di transizioni di un atomo di cesio 133. (TAI)
+Comunque il TAI non è preciso perfettamente perchè l'universo non è regolare. La rotazione della terra diminuisce, i fenomeni astronomici mutano etc etc. Dunque bisogna controllare che il tempo sia sempre allineato con i fenomeni astrologici. Ecco che vengono utilizzati dei leap seconds (che solitamente vengono aggiunti a capodanno) che servono per aggiustare il tempo. 
+
+Clock veloci e lenti:
+Dunque l'ideale sarebbe che tutti i nodi del sistema distribuito avessero tutti l'UTC, ma non è possibile.  
+
+Synchronizing phisical clocks:
+[GPS] 1°
+Un modo di sincronizzare gli orologi fisici è il GPS. Il dispositivo ha un ricevitore (GPS) che riceve il segnale inviato da diversi satelliti. Insieme alla posizione è possibile avere anche il tempo preciso perchè i satelliti del GNSS hanno a bordo orologi atomici. I satelliti hanno a bordo orologi atomici per calcolare la posizione guardando il tempo che ci mette il segnale a raggiungere il dispositivo in ascolto. Dunque se il nodo nel sistema distribuito ha un GPS allora si ha un modo per sincronizzarsi con l'UTC usando il segnale dei satelliti.
+
+Global Positionig System:
+Cosa disturba il segnale che arriva al GPS?
+essere indoor, sotto terra, dove ci sono palazzi alti etc...
+Ma più importante i fenomeni metereologici. Dunque i sistemi si appoggiano a delle stazioni a terra che utilizzano i fenomeni meteorologici per calcolare l'errore
+
+[NTP] 2°
+Se non si ha un GPS il metodo più comune è quello di rivolgersi ad un Server. L'algoritmo NTP si ispira all'algoritmo di Cristian. NTP prevede una gerarchia di server NTP. Lo strato 1 riguarda gli NTP server che hanno un orologio atomico o sono collegati ad un orologio atomico. Negli strati inferiori invece garantiscono meno precisione. 
+Il client fa una richiesta al server. Il server risponde con l'UTC. Problema, latenza tra le richieste. Idea: quando si manda il messaggio di richiesta si inseriscono i timestamp. Così si riesce a fare calcoli matematici basati sui timestamp per stimare i ritardi. NTP ripete la procedura più volte per approssimare in maniera migliore. NTP prevede di raggiungere un'accuratezza nell'ordine dei millisecondi. 
+
+Non tutti i sistemi hanno bisogno di utilizzare il tempo reale. Ad esempio quando un sistema è chiuso è bene pensare che sia importante avere tutti i nodi che sono sincronizzati su un tempo che può anche non corrispondere a quello reale.
+Metodo che viene utilizzato in questo caso:
+
+[Algoritmo Berkeley] 3°
+Ipotesi: Uno dei server funge da time deamon. Il protocollo manda a tutti quanti l'orario del deamon. I nodi rispondono con la differenza tra la loro ora e quella ricevuta. (ignoriamo la latenza per l'esempio). Il server calcola una media tra tutti gli orari e ridistribuisce un orario a tutti i nodi. Spesso questo algoritmo si usa in un ambiente ristretto dove i nodi sono collegati con una banda larga e per quello la latenza non viene solitamente presa in considerazione.
+
+Lamport's Logical Clocks
+In alcuni casi è possibile semplicemente utilizzare degli orologi logici. Dunque si lasciano gli orologi veri invariati e al posto loro vengono utilizzati dei "contatori" per sincronizzare i nodi. Questo può essere utile perchè in alcuni casi è sufficiente avere una conoscenza distribuita (condivisa) da tutti i nodi sull'ordine di determinati eventi e non tutti.
+EVENTO: un evento è mandare/ricevere un messaggio (in questo caso)
+Viene utilizzato un contatore (relazionato con il tempo grazie alla proprietà che va sempre in avanti) che viene chiamato clock logico. Principio: Inizio tutti 0, ogni qualvolta che succede un evento, il contatore viene incrementato. Quando si guarda l'intero sistema in un determinato momento del tempo reale, si ha che gli orologi logici sono differenti. Dunque l'algoritmo di Lamport dice che se A e B sono eventi, L'espressione a --> b denota che la relazione a è avvenuta prima di b. La relazione è transitiva
+...
+... [vedere slide]
+...
+
+Enforcing total order
+Ci sono degli algoritmi in cui sarebbe utile avere un ordine totale dei timestamp nel sistema. Per evitare che ci siano due valori di clock per due eventi del sistema che sono uguali, si aggiunge al contatore un identificatore (può essere qualunque numero che risulta difficile da trovare in qualsiasi processo). Così facendo, prendendo due qualsiasi valori di timestamp (contatori + identificatore) si può stabilire un ordine totale tra i due. Come si fa? Si controlla il valore del contatore e, nel caso di uguaglianza, si controlla l'identificatore.
+Un ordine totale nei timestamp non significa conoscere la relazione temporale tra ogni coppia di eventi, ma conoscere quelli che sono legati dai messaggi che sono stati spostati utilizzando l'algoritmo di lamport.
+
+Mutua esclusione
+(Nei sistemi operativi)
+Ci sono degli insiemi di istruzioni che devono accedere in modo esclusivo a determinate aree della memoria e devono farlo utilizzando semafori o altri metodi per concorrere.
+Nei sistemi distribuiti non si possono utilizzare i semafori. Un esempio tutti devono accedere alla stampante.
+
+Ricart e agrawala (1981) -> Algoritmo distribuito per la mutua esclusione
+Assunzioni: Ordine totale dei timestamp e consegna affidabile dei messaggi. (IMPORTANTE!)
+Funzionamento: un processo P vuole avere acceso ad una risorsa, costruisce un messaggio con all'interno la risorsa che vuole, l'id del messaggio (processo x), il timestamp corrente (contatore + identificatore). Questo messaggio viene inviato a tutti i processi, compreso se stesso
+
+Example:
+0 e 2 vogliono la risorsa allo stesso momento. Entrambi preparano il proprio messaggio e lo inviano a tutti. 1 non vuole accedere alla risorsa e non la sta utilizzando. Riceve il messaggio da 0 e da 2 e manda un messaggio di "ok" ad entrambi (Dato che quella risorsa non gli interessa). 0 ha ricevuto dunque "ok" da 1, ma deve ricevere l'"ok" da tutti prima di poter accedere alla risorsa. Anche 2 invia l'"OK" nonostante anche lui sia interessato alla risorsa perchè si basano sull'ordine totale dei timestamp. Lo 0, oltre a non dare l'"OK" perchè è interessato alla risorsa e sa tramite i timestamp che gli spetta, si deve ricordare che 2 ha chiesto la risorsa e lo fa tramite una coda. Quando 0 ha finito di utilizzare la risorsa, invia il messaggio di "OK" a tutti i processi che hanno richiesto la risorsa (tutti quelli nella coda). A questo punto 2 ha ricevuto l'"OK" da tutti ed entra così nella regione critica. Problema di questo algoritmo? Potrebbe esserci la mancata risposta dei processi e se il sistema fosse peer to peer, il broadcast a tutti sarebbe uno spreco di risorse.
+
+
+--- AGGIUNTO DA CAP 5 ----------
+Algoritmo ad anello: Utilizza una rete di collegamento tra i nodi che non rispetta la rete fisica che c'è tra i nodi. Si parte da un insieme di processi non necessariamente ordinati, si costruisce un anello logico (dove i numeri identificano i processi) e si utilizza un sistema che è si utilizza per costruire le reti lan: il token.
+Un token è un "gettone" unico nella rete che viene fatto girare per l'anello e chi ha il token ha la possibilità di accedere alla risorsa. Il processo passa il token al processo successivo seguendo la rete logica dell'anello. 
+
+Comparazione degli algoritmi:
+Nell'algoritmo ad anello nel caso in cui uno dei nodi si "rompa" va a rompere l'intero anello. Per questo solitamente per avere un po' più di tolleranza si memorizzano k anelli successivi da memorizzare. Un altro problema è se il token viene perso.
+Tra il centralizzato e il distribuito quello che prevede il minor numero di messaggi scambiati è il centralizzato. Nel distribuito si fa un broadcast della richiesta e quindi automaticamente si hanno più messaggi.
+[Nel distributed ricordarsi come svuotare le code]
+
+Election algorithms
+Prevede una modalità con la quale un insieme di nodi si accorda su quale sarà il coordinatore. L'algoritmo elegge il processo \textbf{attivo} con l'ID più alto (o basso, in base a come vuoi strutturarlo). Non posso assumere che i processi conoscano quali altri processi sono attivi.
+
+[1° Bully Algorithm]
+[2° ring-based election]
+Si utilizza una struttura ad anello. Si potrebbe diminuire il numero di messaggi e il numero di processi conosciuti dagli altri processi. I messaggi circolano in senso orario (se non sono presenti fallimenti).
+Come funziona:
+-versione semplice: Nell'anello chi indice l'elezione manda un messaggio di elezione avanti nell'anello "Chi è e che indice un'elezione". QUando un processo riceve un messaggi guarda se il proprio id è più grande di chi ha indetto l'elezione e se lo è lo sostituisce con il proprio. QUando si completa il giro dell'anello si sa chi è il processo che ha l'ID maggiore e lo si propaga agli altri.
+-Versione più complessa: C'è un meccanismo in cui i processi hanno un valore booleano che memorizzano che specifica se loro sono partecipanti o meno e serve per ottimizzare quando ci sono più elezioni contemporaneamente. Inizialmente sono tutti non partecipanti. Il processo Pk fa partire un'elezione e dunque si marca come partecipante (variabile booleana true) e invia il messaggio contenente (elezione e Pk). Quando un processo successivo riceve il messaggio e non è già partecipante, si marchia partecipante e, nel caso in cui il valore Pk sia maggiore, lo sostituisce all'interno del messaggio. Nel caso in cui il processo che riceve il messaggio ha già la variabile "partecipante" a true ed è più grande, blocca l'elezione. Se il messaggio che arriva contiene l'identificatore del processo stesso, viene bloccata l'elezione e invia il messaggio al successivo "Sono il coordinatore".
+
+
+
+
+------------
+
+Omar
+
+Non è sufficiente far comunicare i processi nel sistema distribuito per realizzare le funzionalità del sistema. Ci serve praticamente sempre una qualche forma di coordinamento tra le computazioni che ci sono nei vari nodi e quindi coordinare anche le comunicazioni per raggiungere gli obbiettivi.
+
+Gli algoritmi di sincronizzazione prevedono uno scambio di messaggi. Solo in questo modo possono parlare i nodi e organizzare il loro coordinamento. 
+
+Qual è il problema del tempo in un sistema distribuito? Ogni nodo è indipendente, ha un suo clock interno. Questo clock non è perfetto. 
+Se ogni macchin ha il proprio clock, quindi otrebbe avere una precisione diversa rispetto agli altri e non segnare il tempo esatto, ci potremmo trovare in una situazione un po' strana: qualcosa che succede dopo ha segnato un timestamp precedente a qualcosa che invece è avvenuta prima. 
+I sistemi non possono quindi basarsi sul confronto degli orologi.
+
+Come posso tenere gli orologi allineati? Non è possibile sincronizzare perfettamente gli orologi. Si possono sincronizzare con un certo livello di approssimazione rispetto al tempo preciso. Cos'è il tempo preciso? Il riferimento principale è l'UTC. Il modo in cui noi misuriamo il tempo deriva dall'osservazione di fenomeni astronomici. Di fatto è la distanza tra due eventi. Gli orologi dividono il giorno solare medio basandosi sull'oscillazione dei cristalli di quarzo. L'orologio atomico misura il tempo in termini di transizione di un atomo di cesio 133. Dal giorno solare medio si deriva il secondo solare medio e un secondo corrisponde a 9 miliardi di transizioni del cesio. Ci sono una serie di istituti per la misurazione del tempo che hanno orologi atomici e che si accordano tra di loro, facendo una media. Poi ci sono delle stazioni che distribuiscono questo tempo quasi perfetto (TAI). L'universo non è così regolare, non c'è niente di periodico, anche se così appaiono. Quando ci si accorge che ci si sta scostando dall'osservazione astronomica, questi istituti ogni tanto inseriscono dei secondi chiamati leap seconds. Questo di solito viene fatto a capodanno. Questi leap seconds non sono periodici. Il risultato di TAI + leap seconds è l'UTC.
+
+L'ideale è che i nodi di un sistema distribuito abbiano tutti l'UTC, ma questo non è possibile. Tutti gli orologi reali andranno più lenti o più veloci rispetto all'orologio perfetto che tiene perfettamente l'UTC, quindi dovranno essere sincronizzati più o meno frequentemente in base a quanto divergono rispetto al perfect clock.
+
+Sincronizzare orologi fisici:
+
+Metodo1: GPS
+Il ricevitore GPS non ha la potenza per trasmettere un segnale al satellite. Ascolta soltanto il segnale che arriva da un insieme di satelliti. Il segnale di un solo satellite non è sufficiente. Dopodiché calcola la propria posizione e il tempo preciso. Dunque è possibile utilizzare i GNSS per ottenere il tempo. I satelliti dei sistemi GNSS hanno a bordo degli orologi atomici. Il modo con cui il gps riesce a calcolare la posizione, è guardando quanto impiega il segnale ad essere trasmesso dal satellite al ricevitore. Ogni satellite fa un broadcast di messaggi che contiene il timestamp dell'orologio atomico di quando viene inviato il messaggio, oltre all'identificatore del satellite stesso. Il ricevitore ascolta più satelliti e usa metodi di geometria computazionale per determinare la propria posizione (dimensione spaziale) e una dimensione temporanea. Il ricevitore non ha l'orologio atomico, per cui riesce ad avere un'idea piuttosto precisa dell'orologio atomico osservando i timestamp (?). Se il nodo del sistema distribuito ha un GPS, allora ha già un modo per sincronizzarsi in maniera abbastanza precisa con l'UTC. 
+Qual è l'idea con cui funziona il GPS? Riesco a misurare la distanza tra me e il satellite misurando la differenza dei tempi da quando è stato inviato e quando è stato ricevuto. Utilizzando le equazioni di velocità di trasmissione del segnale, (?) capisco a quante unità di distanza mi trovo, da qualche parte su una circonferenza. Ricevendo la posizione da un secondo satellite, riduco le possibili soluzioni a due punti. Aggiungendo un terzo satellite, deduco più facilmente quale dei due possa essere.
+La precisione del GPS è principalmente disturbata nel caso in cui il segnale faccia fatica ad arrivare ed i fenomenti metereologici alterano il tempo. Esistono metodi di aggiustamento che si appoggiano a delle stazioni a terra che osservando i fenomeni metereologici e danno l'aggiustamento. 
+
+Metodo2: NTP
+Se non abbiamo un GPS sul nostro nodo del sistema distribuito, il metodo più comune è rivolgerci ad un server. L'algorimo NTP deriva dall'algoritmo di Cristian, si ispira a quello ed è stato perfezionato per riuscire a stimare meglio i ritardi dovuti alla rete. Non prevede una banale architettura client-server. C'è una gerarchia di server NTP divisi per strato. Lo strato 1 riguarda gli NTP server che hanno un orologio atomico o sono collegati ad esso con una rete a latenza bassissima. Gli strati inferiori garantiscono meno precisione. L'algoritmo chiede ad un server NTP, supposto avere un'ora più o meno precisa, l'UTC. All'istante T4 (disegno di esempio) il client lo riceve. Le frecce sono inclinate per la latenza. La parte complicata di questo algoritmo sta nel calcolare le latenze. L'idea è che quando mando il messaggio di richiesta metto dentro anche il timestamp. Conoscendo i timestamp di T1,2,3 e 4, posso calcolare la distanza tra T1 e T4 e tra T2 e T3, dividendo per 2 (non è detto che siano uguali, approssimazione). Per fare un'approssimazione migliore di queste latenze, ripete l'operazione più volte. NTP permette d iraggiungere un'accuratezza nell'ordine dei millisecondi.
+
+Fino a qui abbiamo visto due metodi (più utilizzati) per sincronizzarsi con il tempo reale. Non tutti i sistemi, però, hanno bisogno di utilizzare lo stesso tempo che sta fuori, cioè il tempo reale. Se il sistema deve interagire con misure che arrivano dal tempo reale, allora è opportuno. In altri casi, quando il sistema è chiuso, potrei anche accontentarmi del fatto che i miei nodi siano tutti sincronizzati su un tempo. Questo quando non è necessario sincronizzarsi con il mondo reale esterno. 
+
+Metodo3: Berkeley Algorithm
+Uno dei nodi funziona da Time daemon. Manda a tutti quanti (anche a se stesso) il suo orario. I nodi rispondono con la differenza del loro orologio rispetto a quello che hanno ricevuto. Il Time daemon calcola una media tra questi orari e dice a tutti di sistemarsi su questa media. Non importa che sia l'orario vero o no. Spesso si utilizza in un cluster con garanzie di latenza (?). Portare indietro un orologio non è una cosa indolore, quello che avviene, di fatto, è farlo rallentare finché non è allineato, come se fosse stato portato indietro.
+
+In alcuni casi è possibile non sincronizzarsi con il tempo dell'orologio, ma semplicemente usare dei contatori o degli orologi logici. Questi orologi logici possono essere immaginati come dei contatori. Questo è possibile quando nel sistema distribuito è sufficiente avere una conoscenza condivisa sull'ordine di alcuni eventi. Occorre che il sistema sappia cosa è accaduto prima e cosa è accaduto dopo. 
+Un evento potrebbe essere un evento interno (ognuno di questi nodi ha un processo in esecuzione e ci sono eventi che riguardano processing locale) e messaggi inviati/ricevuti. Il tempo aumenta sempre, quindi utilizzando un contatore con la stessa proprietà, questo contatore viene chiamato clock logico. All'inizio saranno tutti 0, ogni evento che accade si incrementa di 1. Ci saranno casi in cui viene incrementato per un evento interno e altri in cui viene incrementato per un evento di scambio di messaggi. 
+Osservando lo stato del sistema, in un particolare istante, noterò che gli orologi logici hanno valori diversi. Lamport vorrebbe che sia rispettata un certa proprietà: se A e B sono eventi e A succede prima di B, considero questa una relazione. Sia il valore del contatore assegnato da un processo all'evento A (valore del contatore nel momento in cui A accade) C(A). Se A occorre prima di B, voglio che C(A) sia minore di C(b), anche se questi sono su due processi diversi.
+Come posso far valere questa proprietà? Se A e B sono eventi sullo stesso processo, il contatore viene semplicemente incrementato. Il problema si pone nel momento in cui a è l'evento di invio da un nodo e b è l'evento di ricezione su un altro nodo. Posso avere tanti eventi prima di A e avere un valore del contatore alto e pochi eventi prima di B e avere un valore del contatore basso, avendo così C(a) minore di C(b). Ovviamente questo non va bene. Dunque:
+- prima di eseguire un evento, incremento il contatore. 
+- Quando processo Pi manda messagio m a Pj, manda dentro al messaggio il valore del contatore, dopo che ha eseguito l'incremento.
+- Pj riceve il messaggio m e guarda il valore del contatore. Guarda se il proprio contatore è più grande di quello contenuto nel messaggio. Prende quindi quello più grande e lo incrementa di uno. 
+
+Esempio di esercizio: 16 maggiore di 6, rispettato. 40 maggiore di 40, rispettato. 56 minore di 60, quindi il 56 deve diventare 61. Tutti quelli a venire andranno incrementati, andando a mantenere lo stesso valore della distanza.  69 minore di 54, per cui stessa cosa.
+
+Come si implementa questo? Tutto ciò che vediamo nei sistemi distribuiti, si implementa come un middleware (?). 
+
+In alcuni casi, se applichiamo l'algoritmo e osserviamo la situazione del sistema, abbiamo alcuni timestamp che sono stati modificati. Ci sono algoritmi in cui sarebbe utile avere un ordine totale di questi timestamp del sistema. Per evitare che due valori nel sistema per due eventi siano uguali, si aggiunge al contatore un .i, dove i è l'identificatore del processo. Potrebbe essere un qualunque numero che è difficile che sia uguale in altri processi. A questo punto, se io prendo due valori di timestamp, posso stabilire un ordine totale tra questi. Innanzitutto vedo qual è il contatore maggiore/minore. Se sono uguali, guardo l'informazione che ho aggiunto, osservando quale è maggiore/minore. L'obbiettivo, quindi, è che ogni evento del sistema abbia associato un timestamp diverso.
+
+Esempio: un ordine totale dei timestamp non significa che conosciamo la relazione temporale tra ogni coppia di eventi. Questo è importante.
+
+Perché può essere utile questo ordine totale di Lamport? Lamport viene applicato in moltissimi altri algoritmi, che hanno come assunzione che ci sia un ordine totale tra i timestamp degli eventi. Consideriamo una replicazione di un database in due zone geografiche diverse. Ci sono quindi latenze diverse a seconda di dove ci si trovi. Supponiamo che contengano conti correnti. Ci sono due utenti: il primo utente fa un versamento di 100€ sul conto. Il secondo aggiunge gli interessi al conto dell'1\% (operatore della banca). Se sulla replica vicino all'utente uno arriva prima il versamento e il contrario sulla replica 2, abbiamo due importi sui due database inconsistenti (?). Il sistema deve concordare sull'ordine delle due operazioni, per averere la consistenza. L'obbiettivo è che il saldo sia uguale su entrambi i database. Come posso fare questa cosa? Ogni utente manda il messaggio a tutti e due i database. Assunzioni: non vengono persi messaggi. Se utente 1 manda due messaggi con un certo ordine, arrivano con l'ordine in cui li ha mandati. Assumiamo che ci sia un processo di invio per entrambi gli utenti e un processo che cura l'aggiornamento di entrambi i database. La soluzione è che il processo inserisca il timestamp, utilizzando i clock logici, manda il timestamp a tutti gli altri processi. Il messaggio è messo nella coda locale del processo ricevente. Il sistema per funzionare ha bisogno di messaggi di ack. Qualsiasi messaggio che arriva lo mette in una coda locale e ordina in base al timestamp. Dopodiché viene mandato un ack a tutti gli altri processi sulla ricezione del messaggio. Gli eventi di ricezione, invio e ack sono tutti ordinati con Lamport. Verificare che questa soluzione sia valida. Pj passa il messaggio all'applicazione quando due condizioni sono verificate:
+- quando il messaggio è in cima alla coda j
+- il messaggio è stato confermato da tutti gli altri processi.
+Tutti i processi avranno quindi la stessa copia della coda locale, poiché sono ordinati secondo i timestamp. Per questo serve Lamport. Questa è la cosa fondamentale. 
+Ogni processo manda l'ack di ciò che riceve. 
+
+Mutua esclusione
+
+Algoritmo centralizzato: prendo un processo su uno dei nodi e lo utilizzo per gestire la coda. Gli altri nodi, con la solita modalità client/server, se hanno bisogno di accedere alla risorsa, chiedono al coordinatore. Esempio: processo 1 chiede di accedere la risorsa. La coda è vuota, per cui il coordinatore gli da l'ok. Non c'è una condizione di conflitto siccome nessun'altro a chiesto. Il processo 2 chiede anche lui di accedere, però il coordinatore decide di non rispondere (supponiamo sia sincrono, per cui si blocca con questa richiesta). Il coordintore lo mette in coda. Il processo (3) coordinatore, ricevuto il release dal processo 1 va nella coda a prendere il primo processo e manda l'ok. Se il 2 è sincrono, si sblocca, riceve la possibilità di usare la risorsa e va avanti fino a quando anche lui farà il release. 
+I problemi di questo algoritmo sono:
+- single point of failure, se il coordintore va giù, nessuno accede più alla risorsa, se non è replicato in qualche modo.
+- se l'utente non rilascia la risorsa, bisognerà avere un meccanismo di timeout (tempo limite di rilascio) dopo il quale viene tolta forzatamente.
+- bottleneck, poiché tutti devono passare dallo stesso coordintore
+
+Algoritmo distribuito: si assume ordine totale dei timestamp e consegna affidabile dei messaggi. Per realizzarlo ci mettiamo un meccanismo di ack. Un processo P che vuole accedere ad una risorsa, costruisce un messaggio che dice quale risorsa vuole, l'id del processo e il timestamp corretto (orologio logico più identificatore del processo). Manda il messaggio a tutti i processi, incluso se stesso. Si può anche ipotizzare di usare l'orologio fisico, ma anche se fossero sincronizzati correttamente, ci si può trovare nella situazione di avere uno stesso timestamp, quindi l'assunzione non vale più, a meno che non si aggiunga al timestamp l'identificatore del processo.
+
+Esempio: 3 processi. Supponiamo che 0 e 2 allo stesso momento vogliono la risorsa. Preparano il messaggio. 1 riceve il messaggio da 0 e 2, ma non gli interessa usare la risorsa e manda un messaggio di OK. 0 ha ricevuto OK da uno, ma prima di prendere la risorsa, deve ricevere OK da tutti, il che avviene. 2 gli ha dato OK perché, grazie all'ordinamento totale, il suo timestamp è minore del suo stesso. 0 può quindi entrare nella critical region. Lo 0 ricorda che 2 ha chiesto la risorsa, quindi lo aggiunge in una sua coda locale. QUando ha finito di usare la risorsa, l'algoritmo gli dice di mandare OK a TUTTI i processi che hanno chiesto la risorsa. 2 ora entra nella regione critica perché si è verificata la condizione che lo abilità (aver ricevuto ok da tutti). Ha memorizzato precedentemente ok da 1.
+
+Problemi per questo algoritmo:
+- mancata risposta da un processo può essere dovuta da un suo crash.
+- se questo fosse un sistema peer to peer con migliaia di nodi, il broadcast sarebbe uno spreco di risorse.
+
+Algoritmo ad anello:
+
+
+----PEZZO AGGIUNTO DA CAP 5------ OMAR
+
+Mutua esclusione: 
+In un sistema distribuito, un insieme di processi in esecuzioni su sistemi diversi vogliono accedere a una risorsa condivisa.  Dobbiamo utilizzare scambio di messaggi.
+
+Algoritmo centralizzato:
+Prima soluzione: un processo fa da coordinatore e getisce la coda
+
+Algoritmi distribuiti:
+- Seconda soluzione: sfrutta l'ordinamento totale di timestamp (Lamport, orologi logici)
+- Algoritmo ad anello: rete di collegamento tra i nodi che non rispecchia la rete di collegamento fisica. Costruiamo un anello logico. Si parte da un gruppo di processi non necessariamente ordinati e si costruisce un anello. Identificatore univoco a ciascun processo in esecuzione su nodi diversi del sistema. Dopodiché, utilizziamo un token, rappresentato da un messaggio. Viene fatto girare il token nell'anello. Chi ha il token può accedere alla risorsa. Essendocene uno solo, non può essere in due nodi contemporaneamente. Quando ha finito di usare la risorsa, passa il token in avanti. Deve aspettare un altro turno per poter utilizzare due volte la risorsa. Il problema è crash, per cui si rompe l'anello. Solitamente si ha un po' di tolleranza e anziché memorizzare solo il sucessivo, si memorizzano k elementi in avanti. Altro problema: se va in crash quello che ha il token si perde il token. Si possono usare timeout o altri modi, ma è più complicato (?).
+
+TABELLA DI COMPARAZIONE DEGLI ALGORITMI
+Infinito: è il caso in cui nessuno ha bisogno della risorsa. Se una risorsa è usata raramente, quindi, il ring è meno adatto.
+
+Algoritmi di elezione:
+Eleggono come coordinatore il processo attivo che ha l'id più alto in quel momento. Attivo indica che in ogni momento alcuni processi potrebbero non essere attivi. Non perde generalità. Posso creare un ordinamento totale, costruendo l'identificatore utilizzando il criterio che si ritiene più opportuno.
+
+Non posso assumere che un processo sappia quali sono quelli attivi. 
+
+Primo algoritmo di questi: algoritmo del bullo
+Abbiamo un gruppo di processi, di cui uno con l'identificatore più alto. Dopo aver tentato di parlare con il coordinatore (timeout scaduto) indice un'elezione. Questo processo non dice a tutti quanti che occorre fare un'elezione, lo dice soltanto a quelli con l'id maggiore del proprio, mandandolo anche al precedente coordintore, che probabilmente aveva l'id più alto del proprio. Ovviamente non sa se gli altri sono attivi. Lo manda anche al coordintore perché magari nel frattempo è tornato disponibile. Questo algoritmo sta su tutti i nodi. Se si riceve un messaggio di elezione e si è attivi, si manda un messaggio di OK. Quando riceve almeno un OK, esce dall'elezione, poiché vuol dire che c'è almeno un processo con l'id più alto che si occuperà dell'elezione. A questo punto, quelli che hanno inviato l'OK mandano un messaggio di elezione ai processi con identificare più alto del loro. Chi lo riceve ed è attivo, manda ancora un messaggio di OK e così via. Se non riceve nessuna risposta entro un timeout, diventa il coordinatore e manda un messaggio in broadcast.
+
+Possono esserci più elezioni contemporaneamente, e di solito dovrebbe vincere lo stesso.
+
+Altro algoritmo basato sull'anello: algoritmo di Chang and Roberts
+Algoritmo proposto prima del bully. Si utilizza una struttura ad anello, in cui i messaggi circolano in senso orario senza fallimeneti e i processo hanno id unico. 
+L'obbiettivo è eleggere il processo attivo con l'id più alto (deve essere unico, si elegge lo stesso anche nel caso vi siano più elezioni indette in modo concorrete).
+Come funziona l'algorimto:
+- I processi hanno un valore booleano che dice se sono partecipanti o non, in modo da fermare il prima possibile messaggi di altre elezioni che porterebbero allo stesso risultato.
+- All'inizio sono tutti non partecipanti.
+- Il processo che capisce che il coordintore non risponde più fa partire un'elezione: si marca come partecipante, mettendo la variabile a true, e manda il messaggio di elezione che contiene il proprio id.
+- Se un processo riceve un messaggio di elezione con un identificatore, ci sono diversi casi:
+* se il mio id è più grande di quello del messaggio, si marca partecipante e sostituisce il proprio id nel messaggio, mandandolo avanti nell'anello. Se invece partecipava già ed è più grande, ferma il messaggio e blocca l'elezione.Il suo id è già considerato nell'anello. 
+* Se il messaggio che riceve ha un id più grande, si marca partecipante e manda semplicemente avanti il messaggio.
+* Se riceve un messaggio che contiene il proprio identificatore, vuol dire che non c'è un altro processo attivo con id più grande. Si marca quindi non partecipante e manda e manca il messaggio di ELECTED con il proprio id al successivo, facendo il giro.
+* Quando un processo ricevete un messaggio ELECTED, si marca non partecipante e memorizza il coordinatore. Quando arriva al coordintore, lo blocca, poiché sa che è arrivato a tutti.
+
+Tutti i processi hanno lo stesso algoritmo.
+
+Algoritmo più semplice:
+Manda un messaggio in avanti nell'anello, dicendo chi è lui e che indice un'elezione. Quando un processo riceve un messaggio, guarda se il proprio id è più grande di quello che ha indetto l'elezione, lo sostituisce con il proprio. Nell'anello gira quindi un messaggio con un ID che viene sostituito quando chi lo prende ha un id maggiore e quando è completato il giro dell'anello si sa qual è il processo con l'id maggiore e si propaga quest'informazione in tutti gli altri. Altro approccio è aggiungere mano a mano l'id anziché sostituire, così da sapere quali sono i processi attivi, ma una volta completato l'anello, uno potrebbe essersi perso nel frattempo.
+
+Invece di memorizzare solo l'indirizzo successivo, memorizzo quello di alcuni nodi dopo. 
+Partecipant/non partecipant server per stoppare il prima possibile messaggi non utili se ci sono elezioni concorrenti.
+Nel caso peggiore vengono scambiati 3n - 1 messaggi, cioè quando il coordinatore dovrebbe essere il nodo appena prima a quello che ha indetto l'elezione.
+
+
+====================================
+Immaginate di avere gruppi di utenti che partecipano ad un gioco in cui il tempo conta (rispondere a degli enigmi). Vogliamo tenere traccia dei punti anche parziali durante il gioco che ciascuna squadra ottiene. Gli eventi hanno dei timestamp con una buon approssimazione all'UTC. C'è un processing time che il server centrale usa per gestire il calcolo dello score dei team. L'event time è quando veramente succedono delle cose (risposta ad enigma). Viene salvato quindi il tempo di risposta all'enigma. Quando è possibile, vengono inviati al server. Come posso gestire questa discrepanza e fornire nel modo mgliore e efficiente questi punteggi parziali?
+===================================
+\end{comment}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,21 @@
+\documentclass[oneside,12pt]{report}
+\include{packages} %file con tutti i package
+\include{lstlisting} %file con i linguaggi per i listing
+\include{main_1} %file con tutti i comandi, intestazione, titolo ecc.
+
+
+\begin{document}
+    \maketitle
+    \pagenumbering{roman}
+    \pagestyle{fancy}
+    \rhead{}
+    \tableofcontents
+    \newpage
+    \pagenumbering{arabic}
+    % inizio spazio ridotto prima del chaptertitle
+    \titlespacing*{\chapter}{0pt}{50pt}{10pt}
+    % fine spazio ridotto prima del chaptertitle
+    \input{capitoli mobile computing}
+    \input{capitoli mobidev}
+    
+\end{document}

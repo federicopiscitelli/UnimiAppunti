@@ -1,0 +1,79 @@
+\section{L'analisi delle applicazioni per dispositivi mobili}
+Rispetto ad un'analisi del software nei dispositivi tradizionali, nei dispositivi mobili l'utente agisce in un contesto diverso.
+
+Le applicazioni si usano per due motivi:
+\begin{itemize}
+    \item per risolvere i problemi: l’utente spesso usa le app per risolvere un problema della vita quotidiana, come ad esempio chiamare qualcuno. 
+    \item sono pronti all'uso, sono quasi sempre accesi
+\end{itemize}
+
+Rispetto ai dispositivi tradizionali, le sessioni d’uso sono mediamente molto brevi, infatti gli utenti vogliono risolvere il loro problema il più velocemente possibile.
+
+L'esperienza dell'utente è un aspetto importante nell'analisi dell'applicazione ed è necessario pensare a come l'utente interagisce con essa. Per questo bisogna eliminare, o minimizzare:
+\begin{itemize}
+    \item tempi di apprendimento
+    \item tempi di set/up e registrazione al servizio
+    \item tempi di utilizzo
+\end{itemize}
+
+WhatsApp è un esempio tra le prime applicazioni di messaggistica che ha avuto la meglio sulle app concorrenti perché non richiede la registrazione e perché aggiunge automaticamente i contatti tra quelli già presenti in rubrica. 
+
+Uno dei primi giochi che ha basato il suo successo su sessioni di gioco brevissime è Angry Birds, dove una partita può durare alcuni secondi e le istruzioni fornite al primo livello sono presentate in un video di meno di 3 secondi.
+
+\section{Progettazione della user experience}
+La user experience (UX) è l'interazione che c'è tra uomo macchina, ciò che una persona prova quando usa un prodotto. 
+Include vari aspetti: esperienza nell’uso, utilità, semplicità d’uso
+La UX estende:
+\begin{itemize}
+    \item il concetto di usabilità: è semplice da usare?
+    \item il concetto di user interface (UI), una componente della UX
+\end{itemize}
+
+Un'app deve: 
+\begin{itemize}
+    \item avere le funzionalità richieste
+    \item funzionare come previsto
+    \item essere usabile dall'utente
+    \item dare soddisfazione all'utente
+\end{itemize}
+Tutte queste componenti contribuiscono a formare la UX.
+
+La cosa più importante è che dobbiamo pensare all'utente. 
+L'utente vuole risolvere il problema, non vuole sapere la struttura dati o le chiamate al server effettuate a livello programmativo. 
+Un aspetto a cui bisogna prestare attenzione è il fatto che le icone e il testo debbano essere scelti con attenzione.
+
+Correggere un errore in fase di analisi costa poco, invece correggerlo in fase di testing, il costo è più elevato in quanto si debba tornare nella fase di analisi e rifare tutte le fasi successive (analisi, implementazione ecc.).
+
+\subsection{Content Prioritization}
+All’utente bisogna presentare i contenuti e le funzionalità più importanti. 
+L’utente deve poter accedere a contenuti e funzionalità aggiuntive in un secondo momento, ad esempio attraverso un menù. 
+
+Dobbiamo conoscere gli utenti, è necessario sapere a cosa sono interessati. Deve essere effettuata un'analisi iniziale con interviste, questionari, ecc. dove vengono coinvolti gli attori e gli altri stakeholder.
+Dobbiamo capire: 
+\begin{itemize}
+    \item il prodotto serve veramente? Quanto valore ha? Come sarà utilizzato? 
+    \item quali funzionalità sono più importanti? 
+    \item quali problemi possono emergere? 
+\end{itemize}
+
+Dobbiamo ad esempio realizzare un'applicazione per la didattica per bambini. In una fase di analisi parlo con i bambini, gli insegnanti, i genitori, ecc. Poi devo pormi delle domande: useranno l’app in classe o a casa? Da soli o con un adulto? 
+
+Dopo che l’app è stata pubblicata posso raccogliere dati di utilizzo come ad esempio quanto spesso l’app viene usata, quali schermate sono mostrate, quali funzionalità sono usate, ecc.
+Esistono vari strumenti, ad esempio Google analytics for mobile, che permettono di svolgere un’analisi data driven che influenza le successive attività di sviluppo.
+
+Ci sono diversi fattori da rispettare: 
+\begin{itemize}
+    \item la semplicità dell'interfaccia grafica: le interfacce grafiche devono essere il più semplici possibili. Negli schermi dei dispositivi mobili lo spazio dedicato ad elementi grafici non indispensabili toglie spazio a quelli indispensabili. 
+    Un esempio di interfaccia grafica confusionaria era quella di Virgilio, quella di Google invece è minimale.
+    \item integrità estetica: l'aspetto estetico dell'applicazione deve riflettere la natura dell'applicazione stessa. Un'applicazione per la produttività deve avere un aspetto serio, semplice, lineare e non frivolo, mentre un'applicazione ludica deve avere un maggiore spazio alla grafica ricercata, divertente e appassionante. 
+    \item consistenza: l'app dovrebbe funzionare e ricordare altre app che l'utente ha già usato. 
+    Se abbiamo delle funzionalità nuove, dobbiamo spiegarle all'utente. 
+    \item affordance: caratteristica di un oggetto o di un ambiente di "suggerire" a un individuo la possibilità di compiere un'azione. Attraverso il proprio aspetto l'interfaccia deve invitare l'utente a interagire intuitivamente con essa, sfruttando l'esperienza pregressa (accumulata nel mondo reale o nell'uso di altre app), ad esempio "scroll to refresh"
+    \item metafore: i riferimenti al mondo reale aiutano a capire meglio le funzionalità di un’applicazione
+    \item personalizzazione: cambiando un modo di fare una certa azione si crea un interesse da parte dell'utente.
+    L'interfaccia standard è semplice da usare e il comportamento è consistente con il sistema operativo, ma è poco attraente. L'interfaccia personalizzata crea divertimento, “wow effect”, ma l'utilizzo è immediato? Il comportamento è consistente? È compatibile con diverse versioni OS?
+    \item minimizzare l'input: bisogna permettere all'utente di fare meno fatica possibile. Inserire testo su dispositivi mobili richiede uno sforzo per molti utenti, per questo dobbiamo mettere l'utente nelle condizioni di dover scrivere meno testo possibile. \item minimizzare lo sforzo: gli oggetti di interfaccia non devono essere troppo piccoli e devono essere sufficientemente distanziati. Per posizionare gli oggetti di interfaccia dovete pensare a come gli utenti tengono lo smartphone durante l’uso.
+    \item prima impressione: è fondamentale nelle applicazioni l'importanza della prima impressione. Dobbiamo fare in modo che non appena l'app venga aperta, sia possibile da parte dell'utente utilizzare subito il servizio. Non dobbiamo chiedere all'utente di registrarsi o loggarsi se non veramente indispensabile e dobbiamo ritardare quanto più possibile la richiesta di permessi
+    \item strumenti di interfaccia nativi: usare strumenti di interfaccia tipici delle app native e non del web
+\end{itemize}
+
